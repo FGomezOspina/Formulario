@@ -1,0 +1,118 @@
+<!-- admin.ejs -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Administración de Clientes</title>
+    <link rel="stylesheet" href="/css/styles.css"> <!-- Asegúrate de tener estilos adecuados -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 10px; /* Reducido de 20px a 10px */
+            font-size: 14px; /* Reducido de 16px a 14px */
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 24px; /* Reducido */
+        }
+        table {
+            width: 100%; /* Puedes ajustar este valor */
+            border-collapse: collapse;
+            margin: 10px 0; /* Reducido de 20px a 10px */
+        }
+        th, td {
+            padding: 8px; /* Reducido de 12px a 8px */
+            border: 1px solid #ccc; /* Cambiado de #ddd a #ccc */
+            text-align: left;
+            font-size: 13px; /* Reducido de 14px */
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        /* Ajustar anchos de columnas */
+        th:nth-child(1), td:nth-child(1) { width: 10%; }
+        th:nth-child(2), td:nth-child(2) { width: 10%; }
+        th:nth-child(3), td:nth-child(3) { width: 15%; }
+        th:nth-child(4), td:nth-child(4) { width: 15%; }
+        th:nth-child(5), td:nth-child(5) { width: 8%; }
+        th:nth-child(6), td:nth-child(6) { width: 8%; }
+        th:nth-child(7), td:nth-child(7) { width: 8%; }
+        th:nth-child(8), td:nth-child(8) { width: 8%; }
+        th:nth-child(9), td:nth-child(9) { width: 12%; }
+        th:nth-child(10), td:nth-child(10) { width: 10%; }
+        th:nth-child(11), td:nth-child(11) { width: 12%; }
+        th:nth-child(12), td:nth-child(12) { width: 10%; }
+        th:nth-child(13), td:nth-child(13) { width: 12%; }
+    </style>
+</head>
+<body>
+    <h1>Administración de Clientes</h1>
+
+    <!-- Caja de búsqueda (opcional, ya manejada por DataTables) -->
+    <!--div class="search-box">
+        <input type="text" id="searchInput" placeholder="Buscar por nombre...">
+    </div-->
+
+    <table id="clientesTable">
+        <thead>
+            <tr>
+                <th>Nombre de la Empresa</th>
+                <th>Nombre Completo</th>
+                <th>Descripción del Puesto</th>
+                <th>Dirección</th>
+                <th>Código Postal</th>
+                <th>Ciudad</th>
+                <th>País</th>
+                <th>Teléfono</th>
+                <th>Email</th>
+                <th>Sitio Web</th>
+                <th>Notas Adicionales</th>
+                <th>Categoría</th>
+                <th>Fecha de Envío</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% clientes.forEach(cliente => { %>
+                <tr>
+                    <td><%= cliente.nombreEmpresa %></td>
+                    <td><%= cliente.nombreCompleto %></td>
+                    <td><%= cliente.descripcionPuesto %></td>
+                    <td><%= cliente.direccion %></td>
+                    <td><%= cliente.codigoPostal %></td>
+                    <td><%= cliente.ciudad %></td>
+                    <td><%= cliente.pais %></td>
+                    <td><%= cliente.telefono %></td>
+                    <td><%= cliente.email %></td>
+                    <td><%= cliente.sitioWeb %></td>
+                    <td><%= cliente.notasAdicionales %></td>
+                    <td>
+                        <%= typeof cliente.categoria === 'string' ? cliente.categoria : cliente.categoria.join(', ') %>
+                    </td>
+                    <td><%= cliente.fecha ? cliente.fecha.toDate().toLocaleString() : 'N/A' %></td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#clientesTable').DataTable({
+                "order": [[ 12, "desc" ]],
+                "pageLength": 10,
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"
+                }
+            });
+        });
+    </script>
+</body>
+</html>
