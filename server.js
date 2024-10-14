@@ -6,6 +6,7 @@ const path = require('path');
 const admin = require('firebase-admin');
 const basicAuth = require('express-basic-auth');
 
+
 // Inicializar Firebase Admin SDK
 const serviceAccount = require('./formulario-531b6-firebase-adminsdk-1z5gl-dd144b687f.json');
 
@@ -20,6 +21,7 @@ admin.initializeApp({
     ignoreUndefinedProperties: false
   }
 });
+
 
 const db = admin.firestore();
 
@@ -57,9 +59,10 @@ app.post('/submit', async (req, res) => {
       email: req.body.email,
       sitioWeb: req.body.sitioWeb,
       notasAdicionales: req.body.notasAdicionales,
-      categoria: req.body.categoria,
+      categoria: req.body.categoria || 'Sin categoría',
       fecha: admin.firestore.FieldValue.serverTimestamp(),
     };
+    
 
     // Agregar el documento a Firestore
     await db.collection('clientes').add(cliente);

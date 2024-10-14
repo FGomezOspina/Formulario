@@ -2,14 +2,15 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Business Contact Form(BCF)</title>
+    <title>Business Contact Form (BCF)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Meta Viewport para Responsividad -->
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header>
         <div class="nav">
             <img src="/images/logo.jpeg" alt="Logo de la Empresa" class="logo">
-            <h1>Business Contact Form(BCF)</h1>
+            <h1>Business Contact Form (BCF)</h1>
             <img src="/images/iftf.png" alt="Logo IFTF" id="iftf" class="logo">
         </div>
     </header>
@@ -18,55 +19,70 @@
             <!-- Sección de Categoría -->
             <section class="categoria">
                 <h2>Category</h2>
-                <label><input type="checkbox" name="categoria" value="Exportador"> Exporter</label>
-                <label><input type="checkbox" name="categoria" value="Importador"> Importer</label>
-                <label><input type="checkbox" name="categoria" value="Agencia"> Agency</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" name="categoria" value="Exportador"> Exporter</label>
+                    <label><input type="checkbox" name="categoria" value="Importador"> Importer</label>
+                    <label><input type="checkbox" name="categoria" value="Agencia"> Agency</label>
+                </div>
             </section>
 
             <!-- Sección de Información de la Empresa -->
             <section class="empresa">
                 <h2>Attach Business Card</h2>
-                <label for="nombreEmpresa">Name of company:
+                <div class="form-group">
+                    <label for="nombreEmpresa">Name of Company:</label>
                     <input type="text" id="nombreEmpresa" name="nombreEmpresa" required>
-                </label>
-                <label for="nombreCompleto">First + Last name:
+                </div>
+                <div class="form-group">
+                    <label for="nombreCompleto">First + Last Name:</label>
                     <input type="text" id="nombreCompleto" name="nombreCompleto" required>
-                </label>
-                <label for="descripcionPuesto">Job Description:
+                </div>
+                <div class="form-group">
+                    <label for="descripcionPuesto">Job Description:</label>
                     <input type="text" id="descripcionPuesto" name="descripcionPuesto" required>
-                </label>
-                <label for="direccion">Street / P.O Box:
+                </div>
+                <div class="form-group">
+                    <label for="direccion">Street / P.O Box:</label>
                     <input type="text" id="direccion" name="direccion" required>
-                </label>
-                <label for="codigoPostal">Postal Code:
+                </div>
+                <div class="form-group">
+                    <label for="codigoPostal">Postal Code:</label>
                     <input type="text" id="codigoPostal" name="codigoPostal" required>
-                </label>
-                <label for="ciudad">City:
+                </div>
+                <div class="form-group">
+                    <label for="ciudad">City:</label>
                     <input type="text" id="ciudad" name="ciudad" required>
-                </label>
-                <label for="pais">Country:
+                </div>
+                <div class="form-group">
+                    <label for="pais">Country:</label>
                     <input type="text" id="pais" name="pais" required>
-                </label>
-                <label for="telefono">Phone:
+                </div>
+                <div class="form-group">
+                    <label for="telefono">Phone:</label>
                     <input type="tel" id="telefono" name="telefono" required>
-                </label>
-                <label for="email">E-mail:
+                </div>
+                <div class="form-group">
+                    <label for="email">E-mail:</label>
                     <input type="email" id="email" name="email" required>
-                </label>
-                <label for="sitioWeb">Web Site:
-                    <input type="text" id="sitioWeb" name="sitioWeb" placeholder="www.tusitio.com" required>
-                </label>
+                </div>
+                <div class="form-group">
+                    <label for="sitioWeb">Web Site:</label>
+                    <input type="text" id="sitioWeb" name="sitioWeb" placeholder="www.yoursite.com" required>
+                </div>
             </section>
 
             <!-- Sección de Notas Adicionales -->
             <section class="notas">
-                <h2>Notes: </h2>
-                <label for="notasAdicionales">Please, Use the following table to detail your product interests, the desired business relationship, orders placed, and delivery requirements:</label>
-                <textarea id="notasAdicionales" name="notasAdicionales" rows="6" placeholder="Enter your additional notes here..."></textarea>
+                <h2>Notes:</h2>
+                <label for="notasAdicionales">Please, use the following table to detail your product interests, the desired business relationship, orders placed, and delivery requirements:</label>
+                <textarea id="notasAdicionales" name="notasAdicionales" rows="6" placeholder="Enter your additional notes here..." required></textarea>
             </section>
 
             <button type="submit">Send</button>
         </form>
     </main>
+    <footer>
+        <p>&copy; 2024 Majorfd S.A.S All rights reserved.</p>
+    </footer>
 </body>
 </html>

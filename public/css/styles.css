@@ -1,5 +1,10 @@
 /* public/css/styles.css */
 
+/* Reset básico para márgenes y paddings */
+* {
+    box-sizing: border-box;
+}
+
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -10,29 +15,38 @@ body {
 header {
     background-color: #4CAF50; /* Fondo verde */
     color: white;
-    padding: 20px 0;
+    padding: 15px 0;
     text-align: center;
     position: relative;
 }
 
 .nav {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
 }
 
 .logo {
-    height: 60px;
+    height: 50px;
+    width: auto;
 }
 
 #iftf {
     height: 100px;
+    width: auto;
 }
 
 main {
     padding: 20px;
     max-width: 800px;
-    margin: auto;
+    margin: 20px auto;
     background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 form {
@@ -48,38 +62,68 @@ h2 {
     border-bottom: 2px solid #4CAF50;
     padding-bottom: 5px;
     color: #333;
+    margin-bottom: 15px;
 }
 
-label {
+.form-group {
     display: flex;
     flex-direction: column;
     margin-bottom: 10px;
-    color: #555;
 }
 
-input[type="text"],
-input[type="email"],
-input[type="tel"],
-input[type="url"],
-textarea,
-input[type="file"] {
-    padding: 10px;
+
+.form-group label {
+    margin-bottom: 5px;
+    color: #555;
+    font-weight: bold;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="tel"],
+.form-group input[type="url"],
+.form-group textarea {
+    padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
+    font-size: 1em;
+    width: 100%;
+}
+
+
+.notas textarea {
+    padding-top: 10px;
+    height: 150px; /* Tamaño fijo */
+    width: 750px;
+    resize: none;  
+}
+
+.checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    color: #555;
+    font-weight: normal;
 }
 
 input[type="checkbox"] {
-    margin-right: 10px;
+    margin-right: 5px;
 }
 
 button {
-    padding: 15px;
+    padding: 12px;
     background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
 }
 
 button:hover {
@@ -91,7 +135,116 @@ footer {
     color: white;
     text-align: center;
     padding: 10px 0;
-    position: fixed;
+    position: relative; /* Cambiado de fixed a relative para evitar superposición en pantallas pequeñas */
     width: 100%;
-    bottom: 0;
+    margin-top: 40px;
+}
+
+/* Media Queries para Responsividad */
+
+/* Pantallas pequeñas (móviles) */
+@media (max-width: 600px) {
+    .nav {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .nav h1 {
+        margin: 10px 0;
+        font-size: 1.5em;
+    }
+
+    .logo {
+        height: 40px;
+    }
+
+    #iftf {
+        height: 80px;
+    }
+
+    main {
+        padding: 15px;
+        margin: 15px;
+    }
+
+    h2 {
+        font-size: 1.2em;
+    }
+
+    .form-group label {
+        font-size: 0.9em;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="tel"],
+    .form-group input[type="url"],
+    .form-group textarea {
+        font-size: 0.9em;
+        padding: 6px;
+    }
+
+    button {
+        padding: 10px;
+        font-size: 0.9em;
+    }
+
+    .notas textarea {
+        padding-top: 10px;
+        height: 150px; /* Tamaño fijo */
+        width: 350px;
+        resize: none;  
+    }
+
+    footer {
+        padding: 8px 0;
+        font-size: 0.9em;
+    }
+}
+
+/* Pantallas medianas (tabletas) */
+@media (min-width: 601px) and (max-width: 992px) {
+    .nav {
+        padding: 0 10px;
+    }
+
+    .logo {
+        height: 45px;
+    }
+
+    #iftf {
+        height: 70px;
+    }
+
+    main {
+        padding: 18px;
+        margin: 18px;
+    }
+
+    h2 {
+        font-size: 1.3em;
+    }
+
+    .form-group label {
+        font-size: 1em;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="tel"],
+    .form-group input[type="url"],
+    .form-group textarea {
+        font-size: 1em;
+        padding: 7px;
+    }
+
+    button {
+        padding: 11px;
+        font-size: 1em;
+    }
+
+    footer {
+        padding: 9px 0;
+        font-size: 1em;
+    }
 }

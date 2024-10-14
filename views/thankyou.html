@@ -3,38 +3,101 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>¡Thank you!</title>
     <link rel="stylesheet" href="/css/styles.css">
     <style>
-        /* Puedes añadir estilos específicos aquí o en styles.css */
+        /* Estilos generales */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+        }
+        .nav {
+            display: flex;
+            align-items: center;
+        }
+        .logo {
+            height: 50px;
+            margin: 0 10px;
+        }
         .thankyou-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            background-color: #f0f8ff;
+            height: calc(100vh - 80px);
             text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
         }
         .thankyou-container h1 {
             color: #2c3e50;
+            font-size: 2em;
         }
         .thankyou-container p {
             color: #34495e;
             font-size: 1.2em;
+            margin-top: 10px;
         }
         .home-button {
             margin-top: 20px;
-            padding: 10px 20px;
+            padding: 12px 24px;
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             text-decoration: none;
+            font-size: 1.2em;
         }
         .home-button:hover {
             background-color: #1abc9c;
+        }
+
+        /* Media queries para pantallas más pequeñas */
+        @media (max-width: 768px) {
+            .thankyou-container h1 {
+                font-size: 1.8em;
+            }
+            .thankyou-container p {
+                font-size: 1.1em;
+            }
+            .home-button {
+                font-size: 1em;
+                padding: 10px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .nav h1 {
+                font-size: 1.5em;
+            }
+            .logo {
+                height: 40px;
+            }
+            .thankyou-container h1 {
+                font-size: 1.5em;
+            }
+            .thankyou-container p {
+                font-size: 1em;
+            }
+            .home-button {
+                font-size: 0.9em;
+                padding: 8px 16px;
+            }
         }
     </style>
 </head>
@@ -42,14 +105,14 @@
     <header>
         <div class="nav">
             <img src="/images/logo.jpeg" alt="Logo de la Empresa" class="logo">
-            <h1>Business Contact Form(BCF)</h1>
+            <h1>Business Contact Form (BCF)</h1>
             <img src="/images/iftf.png" alt="Logo IFTF" id="iftf" class="logo">
         </div>
     </header>
     <div class="thankyou-container">
-        <h1>¡Thank you for your submission.!</h1>
+        <h1>¡Thank you for your submission!</h1>
         <p>Your form has been successfully submitted. We will contact you soon.</p>
-        <a href="/" class="home-button">Volver al Inicio</a>
+        <a href="/" class="home-button">Back to start</a>
     </div>
 </body>
 </html>
