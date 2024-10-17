@@ -1,118 +1,159 @@
-<!-- admin.ejs -->
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Administración de Clientes</title>
-    <link rel="stylesheet" href="/css/styles.css"> <!-- Asegúrate de tener estilos adecuados -->
+    <title>Client Administration</title>
+    <!-- Link a CSS externo -->
+    <link rel="stylesheet" href="/css/styles.css">
+    <!-- Link a Google Fonts para una tipografía más moderna -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Link a Font Awesome para íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Link a DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            padding: 10px; /* Reducido de 20px a 10px */
-            font-size: 14px; /* Reducido de 16px a 14px */
+        /* Estilos para el Modal */
+        .modal {
+            display: none; /* Oculto por defecto */
+            position: fixed; /* Fijo en la pantalla */
+            z-index: 1000; /* Asegurar que esté encima de otros elementos */
+            left: 0;
+            top: 0;
+            width: 100%; /* Ancho completo */
+            height: 100%; /* Altura completa */
+            overflow: auto; /* Habilitar scroll si es necesario */
+            background-color: rgba(0,0,0,0.8); /* Fondo semi-transparente */
+            align-items: center;
+            justify-content: center;
         }
-        h1 {
-            text-align: center;
-            color: #333;
-            font-size: 24px; /* Reducido */
+
+        .modal-content {
+            position: relative;
+            margin: auto;
+            padding: 0;
+            width: 80%;
+            max-width: 700px;
         }
-        table {
-            width: 100%; /* Puedes ajustar este valor */
-            border-collapse: collapse;
-            margin: 10px 0; /* Reducido de 20px a 10px */
+
+        .modal-content img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
         }
-        th, td {
-            padding: 8px; /* Reducido de 12px a 8px */
-            border: 1px solid #ccc; /* Cambiado de #ddd a #ccc */
-            text-align: left;
-            font-size: 13px; /* Reducido de 14px */
+
+        /* Botón de Cerrar */
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 25px;
+            color: #fff;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
         }
-        th {
-            background-color: #4CAF50;
-            color: white;
+
+        .close-modal:hover,
+        .close-modal:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
         }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        /* Ajustar anchos de columnas */
-        th:nth-child(1), td:nth-child(1) { width: 10%; }
-        th:nth-child(2), td:nth-child(2) { width: 10%; }
-        th:nth-child(3), td:nth-child(3) { width: 15%; }
-        th:nth-child(4), td:nth-child(4) { width: 15%; }
-        th:nth-child(5), td:nth-child(5) { width: 8%; }
-        th:nth-child(6), td:nth-child(6) { width: 8%; }
-        th:nth-child(7), td:nth-child(7) { width: 8%; }
-        th:nth-child(8), td:nth-child(8) { width: 8%; }
-        th:nth-child(9), td:nth-child(9) { width: 12%; }
-        th:nth-child(10), td:nth-child(10) { width: 10%; }
-        th:nth-child(11), td:nth-child(11) { width: 12%; }
-        th:nth-child(12), td:nth-child(12) { width: 10%; }
-        th:nth-child(13), td:nth-child(13) { width: 12%; }
     </style>
 </head>
 <body>
-    <h1>Administración de Clientes</h1>
+    <header>
+        <div class="header-container">
+            <h1>Client Administration</h1>
+        </div>
+    </header>
+    <main>
+        <div class="table-container">
+            <table id="clientsTable" class="display">
+                <thead>
+                    <tr>
+                        <th>Extracted Text</th>
+                        <th>Additional Notes</th>
+                        <th>Submission Date</th>
+                        <th>Logo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% clients.forEach(client => { %>
+                        <tr>
+                            <td><%= client.extractedText %></td>
+                            <td><%= client.additionalNotes %></td>
+                            <td><%= client.submissionDate ? client.submissionDate.toDate().toLocaleString() : 'N/A' %></td>
+                            <td>
+                                <% if (client.logoURL) { %>
+                                    <img src="<%= client.logoURL %>" alt="Logo" class="logo-image clickable">
+                                <% } else { %>
+                                    N/A
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2024 Majorfd S.A.S. All rights reserved.</p>
+    </footer>
 
-    <!-- Caja de búsqueda (opcional, ya manejada por DataTables) -->
-    <!--div class="search-box">
-        <input type="text" id="searchInput" placeholder="Buscar por nombre...">
-    </div-->
+    <!-- Modal para Mostrar el Logo Agrandado -->
+    <div id="logoModal" class="modal">
+        <span class="close-modal">&times;</span>
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="Logo Agrandado">
+        </div>
+    </div>
 
-    <table id="clientesTable">
-        <thead>
-            <tr>
-                <th>Nombre de la Empresa</th>
-                <th>Nombre Completo</th>
-                <th>Descripción del Puesto</th>
-                <th>Dirección</th>
-                <th>Código Postal</th>
-                <th>Ciudad</th>
-                <th>País</th>
-                <th>Teléfono</th>
-                <th>Email</th>
-                <th>Sitio Web</th>
-                <th>Notas Adicionales</th>
-                <th>Categoría</th>
-                <th>Fecha de Envío</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% clientes.forEach(cliente => { %>
-                <tr>
-                    <td><%= cliente.nombreEmpresa %></td>
-                    <td><%= cliente.nombreCompleto %></td>
-                    <td><%= cliente.descripcionPuesto %></td>
-                    <td><%= cliente.direccion %></td>
-                    <td><%= cliente.codigoPostal %></td>
-                    <td><%= cliente.ciudad %></td>
-                    <td><%= cliente.pais %></td>
-                    <td><%= cliente.telefono %></td>
-                    <td><%= cliente.email %></td>
-                    <td><%= cliente.sitioWeb %></td>
-                    <td><%= cliente.notasAdicionales %></td>
-                    <td>
-                        <%= typeof cliente.categoria === 'string' ? cliente.categoria : cliente.categoria.join(', ') %>
-                    </td>
-                    <td><%= cliente.fecha ? cliente.fecha.toDate().toLocaleString() : 'N/A' %></td>
-                </tr>
-            <% }) %>
-        </tbody>
-    </table>
-
+    <!-- Scripts de jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Scripts de DataTables -->
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <!-- Script de Inicialización de DataTables -->
     <script>
         $(document).ready(function() {
-            $('#clientesTable').DataTable({
-                "order": [[ 12, "desc" ]],
+            $('#clientsTable').DataTable({
+                "order": [[ 2, "desc" ]],
                 "pageLength": 10,
                 "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"
-                }
+                    "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/en-GB.json"
+                },
+                "responsive": true,
+                "autoWidth": false,
+                "columnDefs": [
+                    { "orderable": false, "targets": 3 } // Desactivar ordenamiento en la columna de Logo
+                ]
             });
         });
+
+        // Funcionalidad del Modal
+        const modal = document.getElementById("logoModal");
+        const modalImg = document.getElementById("modalImage");
+        const closeBtn = document.getElementsByClassName("close-modal")[0];
+
+        // Abrir el modal al hacer clic en una imagen de logo
+        const logos = document.querySelectorAll(".logo-image.clickable");
+        logos.forEach(function(logo) {
+            logo.addEventListener("click", function() {
+                modal.style.display = "flex";
+                modalImg.src = this.src;
+            });
+        });
+
+        // Cerrar el modal al hacer clic en la 'x'
+        closeBtn.onclick = function() { 
+            modal.style.display = "none";
+        }
+
+        // Cerrar el modal al hacer clic fuera de la imagen
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
     </script>
 </body>
 </html>

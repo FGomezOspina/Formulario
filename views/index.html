@@ -1,88 +1,382 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Business Contact Form (BCF)</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Meta Viewport para Responsividad -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Link to external CSS -->
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header>
         <div class="nav">
-            <img src="/images/logo.jpeg" alt="Logo de la Empresa" class="logo">
+            <img src="/images/logo.jpeg" alt="Company Logo" class="logo">
             <h1>Business Contact Form (BCF)</h1>
-            <img src="/images/iftf.png" alt="Logo IFTF" id="iftf" class="logo">
+            <img src="/images/iftf.png" alt="IFTF Logo" id="iftf" class="logo">
         </div>
     </header>
     <main>
-        <form action="/submit" method="POST">
-            <!-- Sección de Categoría -->
-            <section class="categoria">
-                <h2>Category</h2>
-                <div class="checkbox-group">
-                    <label><input type="checkbox" name="categoria" value="Exportador"> Exporter</label>
-                    <label><input type="checkbox" name="categoria" value="Importador"> Importer</label>
-                    <label><input type="checkbox" name="categoria" value="Agencia"> Agency</label>
+        <div id="error-message" style="display: none; color: red; text-align: center; margin-bottom: 20px;"></div>
+
+        <!-- Main button to choose method -->
+        <button id="choose-method-btn">Scan Image</button>
+
+        <!-- Method options (hidden by default) -->
+        <div id="method-options" class="method-options" style="display: none;">
+            <button id="upload-method-btn">Upload Image from Gallery</button>
+            <button id="realtime-method-btn">Scan with Web Camera</button>
+        </div>
+
+        <!-- Upload Image Form -->
+        <form id="form-upload" action="/submit" method="POST" style="display: none;">
+            <!-- Image upload section -->
+            <section class="company">
+                <h2>Upload Business Card or Image</h2>
+                <div class="form-group">
+                    <label for="image-upload">Upload Image or Business Card:</label>
+                    <input type="file" id="image-upload" name="image" accept="image/*">
+                </div>
+                <!-- Image preview -->
+                <!--img id="image-preview-upload" src="#" alt="Image Preview"-->
+            </section>
+
+            <!-- Optional Logo Upload Section -->
+            <section class="company">
+                <h2>Upload Photo</h2>
+                <div class="form-group">
+                    <label for="logo-upload">Upload Photo:</label>
+                    <input type="file" id="logo-upload" name="logo" accept="image/*">
+                </div>
+                <!-- Logo preview -->
+                <!--img id="logo-preview-upload" src="#" alt="Logo Preview" style="display: none;"-->
+            </section>
+
+            <!-- Extracted text section -->
+            <section class="company">
+                <h2>Extracted Text from Image</h2>
+                <div class="form-group">
+                    <label for="extractedText-upload">Extracted Text:</label>
+                    <textarea id="extractedText-upload" name="extractedText" class="extracted-text" readonly></textarea>
                 </div>
             </section>
 
-            <!-- Sección de Información de la Empresa -->
-            <section class="empresa">
-                <h2>Attach Business Card</h2>
-                <div class="form-group">
-                    <label for="nombreEmpresa">Name of Company:</label>
-                    <input type="text" id="nombreEmpresa" name="nombreEmpresa">
-                </div>
-                <div class="form-group">
-                    <label for="nombreCompleto">First + Last Name:</label>
-                    <input type="text" id="nombreCompleto" name="nombreCompleto" required>
-                </div>
-                <div class="form-group">
-                    <label for="descripcionPuesto">Job Description:</label>
-                    <input type="text" id="descripcionPuesto" name="descripcionPuesto">
-                </div>
-                <div class="form-group">
-                    <label for="direccion">Street / P.O Box:</label>
-                    <input type="text" id="direccion" name="direccion">
-                </div>
-                <div class="form-group">
-                    <label for="codigoPostal">Postal Code:</label>
-                    <input type="text" id="codigoPostal" name="codigoPostal">
-                </div>
-                <div class="form-group">
-                    <label for="ciudad">City:</label>
-                    <input type="text" id="ciudad" name="ciudad">
-                </div>
-                <div class="form-group">
-                    <label for="pais">Country:</label>
-                    <input type="text" id="pais" name="pais">
-                </div>
-                <div class="form-group">
-                    <label for="telefono">Phone:</label>
-                    <input type="tel" id="telefono" name="telefono" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">E-mail:</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="sitioWeb">Web Site:</label>
-                    <input type="text" id="sitioWeb" name="sitioWeb" placeholder="www.yoursite.com" >
-                </div>
-            </section>
-
-            <!-- Sección de Notas Adicionales -->
-            <section class="notas">
+            <!-- Additional notes section -->
+            <section class="notes">
                 <h2>Notes:</h2>
-                <label for="notasAdicionales">Please, use the following table to detail your product interests, the desired business relationship, orders placed, and delivery requirements:</label>
-                <textarea id="notasAdicionales" name="notasAdicionales" rows="6" placeholder="Enter your additional notes here..."></textarea>
+                <label for="additionalNotes-upload">Please add any additional notes or details:</label>
+                <textarea id="additionalNotes-upload" name="additionalNotes" rows="6" placeholder="Enter your additional notes here..."></textarea>
             </section>
 
-            <button type="submit">Send</button>
+            <input type="hidden" id="logoURL-upload" name="logoURL" value="">
+
+            <button type="submit" class="submit-btn">Submit</button>
         </form>
+
+        <!-- Real-Time Scanning Form -->
+        <form id="form-realtime" action="/submit" method="POST" style="display: none;">
+            <!-- Real-time scanning section -->
+            <section class="company">
+                <h2>Scan Text in Real-Time</h2>
+                <div class="form-group">
+                    <label for="video-realtime">Web Camera:</label>
+                    <video id="video-realtime" autoplay></video>
+                    <button type="button" id="capture-btn">Capture Image</button>
+                </div>
+            </section>
+
+            <!-- Optional Logo Upload Section -->
+            <section class="company">
+                <h2>Upload Photo</h2>
+                <div class="form-group">
+                    <label for="logo-upload-realtime">Upload Photo:</label>
+                    <input type="file" id="logo-upload-realtime" name="logo" accept="image/*">
+                </div>
+                <!-- Logo preview -->
+                <!--img id="logo-preview-realtime" src="#" alt="Logo Preview" style="display: none;"-->
+            </section>
+
+            <!-- Extracted text section -->
+            <section class="company">
+                <h2>Extracted Text from Image</h2>
+                <div class="form-group">
+                    <label for="extractedText-realtime">Extracted Text:</label>
+                    <textarea id="extractedText-realtime" name="extractedText" class="extracted-text" readonly></textarea>
+                </div>
+            </section>
+
+            <!-- Additional notes section -->
+            <section class="notes">
+                <h2>Notes:</h2>
+                <label for="additionalNotes-realtime">Please add any additional notes or details:</label>
+                <textarea id="additionalNotes-realtime" name="additionalNotes" rows="6" placeholder="Enter your additional notes here..."></textarea>
+            </section>
+
+            <input type="hidden" id="logoURL-realtime" name="logoURL" value="">
+
+            <button type="submit" class="submit-btn">Submit</button>
+        </form>
+
+        <div id="error-message"></div>
     </main>
+
     <footer>
         <p>&copy; 2024 Majorfd S.A.S All rights reserved.</p>
     </footer>
+
+    <script>
+        // Main method selection
+        const chooseMethodBtn = document.getElementById('choose-method-btn');
+        const methodOptions = document.getElementById('method-options');
+        const uploadMethodBtn = document.getElementById('upload-method-btn');
+        const realtimeMethodBtn = document.getElementById('realtime-method-btn');
+
+        const formUpload = document.getElementById('form-upload');
+        const formRealtime = document.getElementById('form-realtime');
+
+        // Show method options on main button click
+        chooseMethodBtn.addEventListener('click', () => {
+            methodOptions.style.display = 'block';
+            chooseMethodBtn.style.display = 'none';
+        });
+
+        // Choose Upload Image method
+        uploadMethodBtn.addEventListener('click', () => {
+            methodOptions.style.display = 'none';
+            formUpload.style.display = 'block';
+        });
+
+        // Choose Real-Time Scanning method
+        realtimeMethodBtn.addEventListener('click', () => {
+            methodOptions.style.display = 'none';
+            formRealtime.style.display = 'block';
+            startRealtimeCamera();
+        });
+
+        // ----------- Upload Image Handling -----------
+        document.getElementById('image-upload').addEventListener('change', async function () {
+            const fileInput = document.getElementById('image-upload');
+            const errorMessage = document.getElementById('error-message');
+            const extractedText = document.getElementById('extractedText-upload');
+            const imagePreview = document.getElementById('image-preview-upload');
+
+            if (fileInput.files.length === 0) {
+                errorMessage.textContent = "Please upload an image.";
+                return;
+            }
+
+            // Show image preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+            }
+            reader.readAsDataURL(fileInput.files[0]);
+
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+
+            try {
+                // Send the image to the server for processing
+                const response = await fetch('/extract-text-upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error processing the image.');
+                }
+
+                const result = await response.json();
+                extractedText.value = result.extractedText; // Display extracted text
+            } catch (error) {
+                console.error('Error processing the image:', error);
+                errorMessage.textContent = 'Error extracting text from the image.';
+            }
+        });
+
+        // ----------- Logo Upload Handling for Upload Method -----------
+        document.getElementById('logo-upload').addEventListener('change', async function () {
+            const logoInput = document.getElementById('logo-upload');
+            const logoPreview = document.getElementById('logo-preview-upload');
+            const logoURLInput = document.getElementById('logoURL-upload');
+
+            if (logoInput.files.length === 0) {
+                // No logo uploaded
+                logoPreview.style.display = 'none';
+                logoURLInput.value = '';
+                return;
+            }
+
+            // Show logo preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                logoPreview.src = e.target.result;
+                logoPreview.style.display = 'block';
+            }
+            reader.readAsDataURL(logoInput.files[0]);
+
+            const formData = new FormData();
+            formData.append('logo', logoInput.files[0]);
+
+            try {
+                // Send the logo to the server for uploading
+                const response = await fetch('/upload-logo', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error uploading the logo.');
+                }
+
+                const result = await response.json();
+                logoURLInput.value = result.logoURL; // Store the logo URL
+            } catch (error) {
+                console.error('Error uploading the logo:', error);
+                alert('Error uploading the logo. Please try again.');
+                logoPreview.style.display = 'none';
+                logoURLInput.value = '';
+            }
+        });
+
+        // ----------- Real-Time Scanning Handling -----------
+        const video = document.getElementById('video-realtime');
+        const captureBtn = document.getElementById('capture-btn');
+        const extractedTextRealtime = document.getElementById('extractedText-realtime');
+        const errorMessageRealtime = document.getElementById('error-message');
+
+        // Logo upload for real-time scanning
+        document.getElementById('logo-upload-realtime').addEventListener('change', async function () {
+            const logoInput = document.getElementById('logo-upload-realtime');
+            const logoPreview = document.getElementById('logo-preview-realtime');
+            const logoURLInput = document.getElementById('logoURL-realtime');
+
+            if (logoInput.files.length === 0) {
+                // No logo uploaded
+                logoPreview.style.display = 'none';
+                logoURLInput.value = '';
+                return;
+            }
+
+            // Show logo preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                logoPreview.src = e.target.result;
+                logoPreview.style.display = 'block';
+            }
+            reader.readAsDataURL(logoInput.files[0]);
+
+            const formData = new FormData();
+            formData.append('logo', logoInput.files[0]);
+
+            try {
+                // Send the logo to the server for uploading
+                const response = await fetch('/upload-logo', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error uploading the logo.');
+                }
+
+                const result = await response.json();
+                logoURLInput.value = result.logoURL; // Store the logo URL
+            } catch (error) {
+                console.error('Error uploading the logo:', error);
+                alert('Error uploading the logo. Please try again.');
+                logoPreview.style.display = 'none';
+                logoURLInput.value = '';
+            }
+        });
+
+        function startRealtimeCamera() {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(function(stream) {
+                        video.srcObject = stream;
+                        video.play();
+                        video.style.display = 'block';
+                        captureBtn.style.display = 'inline-block';
+                    })
+                    .catch(function(err) {
+                        console.error("Error accessing the webcam:", err);
+                        errorMessageRealtime.textContent = 'Unable to access the webcam.';
+                    });
+            } else {
+                errorMessageRealtime.textContent = 'Your browser does not support webcam access.';
+            }
+        }
+
+        // Capture image from video and send to server
+        captureBtn.addEventListener('click', async function () {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataURL = canvas.toDataURL('image/png');
+
+            try {
+                // Send the captured image to the server for processing
+                const response = await fetch('/extract-text-realtime', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ imageData: dataURL })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error processing the real-time image.');
+                }
+
+                const result = await response.json();
+                extractedTextRealtime.value = result.extractedText; // Display extracted text
+            } catch (error) {
+                console.error('Error processing the real-time image:', error);
+                errorMessageRealtime.textContent = 'Error extracting text from the image.';
+            }
+        });
+
+        function showError(message) {
+        const errorMessage = document.getElementById('error-message');
+        errorMessage.textContent = message;
+        errorMessage.style.display = 'block';
+    }
+
+    // Función para ocultar mensajes de error
+    function hideError() {
+        const errorMessage = document.getElementById('error-message');
+        errorMessage.textContent = '';
+        errorMessage.style.display = 'none';
+    }
+
+    // Validación antes de enviar el formulario de subida de imagen
+    document.getElementById('form-upload').addEventListener('submit', function(event) {
+        const extractedText = document.getElementById('extractedText-upload').value.trim();
+        if (!extractedText) {
+            event.preventDefault(); // Evita el envío del formulario
+            showError('No text has been extracted. Please upload an image and ensure text extraction is successful.');
+        } else {
+            hideError(); // Oculta el mensaje de error si todo está bien
+        }
+    });
+
+    // Validación antes de enviar el formulario de escaneo en tiempo real
+    document.getElementById('form-realtime').addEventListener('submit', function(event) {
+        const extractedTextRealtime = document.getElementById('extractedText-realtime').value.trim();
+        if (!extractedTextRealtime) {
+            event.preventDefault(); // Evita el envío del formulario
+            showError('No text has been extracted. Please capture an image and ensure text extraction is successful.');
+        } else {
+            hideError(); // Oculta el mensaje de error si todo está bien
+        }
+    });
+
+        // ----------- Form Submission Handling -----------
+        // Since the forms are submitted normally, ensure that logoURL is included
+        // No additional JavaScript is needed for form submission as logoURL is a hidden input
+    </script>
 </body>
 </html>

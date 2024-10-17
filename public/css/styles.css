@@ -91,7 +91,7 @@ h2 {
 }
 
 
-.notas textarea {
+.notes textarea {
     padding-top: 10px;
     height: 150px; /* Tamaño fijo */
     width: 750px;
@@ -189,7 +189,7 @@ footer {
         font-size: 0.9em;
     }
 
-    .notas textarea {
+    .notes textarea {
         padding-top: 10px;
         height: 150px; /* Tamaño fijo */
         width: 350px;
@@ -247,4 +247,130 @@ footer {
         padding: 9px 0;
         font-size: 1em;
     }
+}
+
+/* General Styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+header {
+    background-color: #4CAF50;
+    padding: 20px 0;
+    text-align: center;
+    color: #fff;
+}
+
+.header-container h1 {
+    margin: 0;
+    font-size: 2em;
+    font-weight: 500;
+}
+
+main {
+    padding: 40px 20px;
+}
+
+
+/* Table Styles */
+.table-container {
+    overflow-x: auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+table.dataTable thead th {
+    background-color: #f2f2f2;
+    color: #333;
+    border-bottom: 2px solid #ddd;
+}
+
+table.dataTable tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+table.dataTable tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+.logo-image {
+    max-width: 100px;
+    max-height: 100px;
+    border-radius: 8px;
+    object-fit: contain;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.logo-image:hover {
+    transform: scale(1.05);
+}
+
+/* DataTables Pagination and Search */
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    background-color: #4CAF50 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 4px !important;
+    padding: 5px 10px !important;
+    margin: 2px !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background-color: #45a049 !important;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px;
+}
+
+.dataTables_wrapper .dataTables_length select {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+    .header-container h1 {
+        font-size: 1.5em;
+    }
+
+    main {
+        padding: 20px 10px;
+    }
+
+    .logo-image {
+        max-width: 80px;
+        max-height: 80px;
+    }
+}
+
+/* Modal Styles - Moved to admin.ejs inline styles for better encapsulation */
+
+/* Optional: Scrollbar Styling for Webkit Browsers */
+.table-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
