@@ -16,8 +16,6 @@
         </div>
     </header>
     <main>
-        <div id="error-message" style="display: none; color: red; text-align: center; margin-bottom: 20px;"></div>
-
         <!-- Main button to choose method -->
         <button id="choose-method-btn">Scan Image</button>
 
@@ -37,18 +35,18 @@
                     <input type="file" id="image-upload" name="image" accept="image/*">
                 </div>
                 <!-- Image preview -->
-                <!--img id="image-preview-upload" src="#" alt="Image Preview"-->
+                <img id="image-preview-upload" src="#" alt="Image Preview">
             </section>
 
             <!-- Optional Logo Upload Section -->
             <section class="company">
-                <h2>Upload Photo</h2>
+                <h2>Upload Logo (Optional)</h2>
                 <div class="form-group">
-                    <label for="logo-upload">Upload Photo:</label>
+                    <label for="logo-upload">Upload Logo:</label>
                     <input type="file" id="logo-upload" name="logo" accept="image/*">
                 </div>
                 <!-- Logo preview -->
-                <!--img id="logo-preview-upload" src="#" alt="Logo Preview" style="display: none;"-->
+                <img id="logo-preview-upload" src="#" alt="Logo Preview" style="display: none;">
             </section>
 
             <!-- Extracted text section -->
@@ -81,18 +79,20 @@
                     <label for="video-realtime">Web Camera:</label>
                     <video id="video-realtime" autoplay></video>
                     <button type="button" id="capture-btn">Capture Image</button>
+                    <!-- Nuevo Botón para Cambiar la Cámara -->
+                    <button type="button" id="switch-camera-btn">Switch Camera</button>
                 </div>
             </section>
 
             <!-- Optional Logo Upload Section -->
             <section class="company">
-                <h2>Upload Photo</h2>
+                <h2>Upload Logo (Optional)</h2>
                 <div class="form-group">
-                    <label for="logo-upload-realtime">Upload Photo:</label>
+                    <label for="logo-upload-realtime">Upload Logo:</label>
                     <input type="file" id="logo-upload-realtime" name="logo" accept="image/*">
                 </div>
                 <!-- Logo preview -->
-                <!--img id="logo-preview-realtime" src="#" alt="Logo Preview" style="display: none;"-->
+                <img id="logo-preview-realtime" src="#" alt="Logo Preview" style="display: none;">
             </section>
 
             <!-- Extracted text section -->
@@ -116,7 +116,7 @@
             <button type="submit" class="submit-btn">Submit</button>
         </form>
 
-        <div id="error-message"></div>
+        <div id="error-message" style="display: none; color: red; text-align: center; margin-bottom: 20px;"></div>
     </main>
 
     <footer>
@@ -161,6 +161,7 @@
 
             if (fileInput.files.length === 0) {
                 errorMessage.textContent = "Please upload an image.";
+                errorMessage.style.display = 'block';
                 return;
             }
 
@@ -188,9 +189,11 @@
 
                 const result = await response.json();
                 extractedText.value = result.extractedText; // Display extracted text
+                errorMessage.style.display = 'none';
             } catch (error) {
                 console.error('Error processing the image:', error);
                 errorMessage.textContent = 'Error extracting text from the image.';
+                errorMessage.style.display = 'block';
             }
         });
 
@@ -242,8 +245,12 @@
         // ----------- Real-Time Scanning Handling -----------
         const video = document.getElementById('video-realtime');
         const captureBtn = document.getElementById('capture-btn');
+        const switchCameraBtn = document.getElementById('switch-camera-btn');
         const extractedTextRealtime = document.getElementById('extractedText-realtime');
         const errorMessageRealtime = document.getElementById('error-message');
+
+        let currentStream = null;
+        let currentFacingMode = 'user'; // Inicialmente usar la cámara frontal
 
         // Logo upload for real-time scanning
         document.getElementById('logo-upload-realtime').addEventListener('change', async function () {
@@ -290,25 +297,41 @@
             }
         });
 
-        function startRealtimeCamera() {
+        // Función para iniciar la cámara con el facingMode actual
+        async function startRealtimeCamera() {
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ video: true })
-                    .then(function(stream) {
-                        video.srcObject = stream;
-                        video.play();
-                        video.style.display = 'block';
-                        captureBtn.style.display = 'inline-block';
-                    })
-                    .catch(function(err) {
-                        console.error("Error accessing the webcam:", err);
-                        errorMessageRealtime.textContent = 'Unable to access the webcam.';
+                // Detener cualquier stream previo
+                if (currentStream) {
+                    currentStream.getTracks().forEach(track => track.stop());
+                }
+
+                try {
+                    currentStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: currentFacingMode }
                     });
+                    video.srcObject = currentStream;
+                    video.style.display = 'block';
+                    captureBtn.style.display = 'inline-block';
+                    switchCameraBtn.style.display = 'inline-block';
+                    errorMessageRealtime.style.display = 'none';
+                } catch (err) {
+                    console.error("Error accessing the webcam:", err);
+                    errorMessageRealtime.textContent = 'Unable to access the webcam.';
+                    errorMessageRealtime.style.display = 'block';
+                }
             } else {
                 errorMessageRealtime.textContent = 'Your browser does not support webcam access.';
+                errorMessageRealtime.style.display = 'block';
             }
         }
 
-        // Capture image from video and send to server
+        // Función para cambiar entre cámaras
+        switchCameraBtn.addEventListener('click', () => {
+            currentFacingMode = (currentFacingMode === 'user') ? 'environment' : 'user';
+            startRealtimeCamera();
+        });
+
+        // Capturar imagen desde el video y enviarla al servidor
         captureBtn.addEventListener('click', async function () {
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth;
@@ -318,7 +341,7 @@
             const dataURL = canvas.toDataURL('image/png');
 
             try {
-                // Send the captured image to the server for processing
+                // Enviar la imagen capturada al servidor para procesar
                 const response = await fetch('/extract-text-realtime', {
                     method: 'POST',
                     headers: {
@@ -333,50 +356,50 @@
 
                 const result = await response.json();
                 extractedTextRealtime.value = result.extractedText; // Display extracted text
+                errorMessageRealtime.style.display = 'none';
             } catch (error) {
                 console.error('Error processing the real-time image:', error);
                 errorMessageRealtime.textContent = 'Error extracting text from the image.';
+                errorMessageRealtime.style.display = 'block';
             }
         });
 
-        function showError(message) {
-        const errorMessage = document.getElementById('error-message');
-        errorMessage.textContent = message;
-        errorMessage.style.display = 'block';
-    }
-
-    // Función para ocultar mensajes de error
-    function hideError() {
-        const errorMessage = document.getElementById('error-message');
-        errorMessage.textContent = '';
-        errorMessage.style.display = 'none';
-    }
-
-    // Validación antes de enviar el formulario de subida de imagen
-    document.getElementById('form-upload').addEventListener('submit', function(event) {
-        const extractedText = document.getElementById('extractedText-upload').value.trim();
-        if (!extractedText) {
-            event.preventDefault(); // Evita el envío del formulario
-            showError('No text has been extracted. Please upload an image and ensure text extraction is successful.');
-        } else {
-            hideError(); // Oculta el mensaje de error si todo está bien
-        }
-    });
-
-    // Validación antes de enviar el formulario de escaneo en tiempo real
-    document.getElementById('form-realtime').addEventListener('submit', function(event) {
-        const extractedTextRealtime = document.getElementById('extractedText-realtime').value.trim();
-        if (!extractedTextRealtime) {
-            event.preventDefault(); // Evita el envío del formulario
-            showError('No text has been extracted. Please capture an image and ensure text extraction is successful.');
-        } else {
-            hideError(); // Oculta el mensaje de error si todo está bien
-        }
-    });
-
         // ----------- Form Submission Handling -----------
-        // Since the forms are submitted normally, ensure that logoURL is included
-        // No additional JavaScript is needed for form submission as logoURL is a hidden input
+        // Validación en el frontend para evitar enviar el formulario sin texto extraído
+        // Funciones para mostrar y ocultar mensajes de error
+        function showError(message) {
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+
+        function hideError() {
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.textContent = '';
+            errorMessage.style.display = 'none';
+        }
+
+        // Validación antes de enviar el formulario de subida de imagen
+        document.getElementById('form-upload').addEventListener('submit', function(event) {
+            const extractedText = document.getElementById('extractedText-upload').value.trim();
+            if (!extractedText) {
+                event.preventDefault(); // Evita el envío del formulario
+                showError('No text has been extracted. Please upload an image and ensure text extraction is successful.');
+            } else {
+                hideError(); // Oculta el mensaje de error si todo está bien
+            }
+        });
+
+        // Validación antes de enviar el formulario de escaneo en tiempo real
+        document.getElementById('form-realtime').addEventListener('submit', function(event) {
+            const extractedTextRealtime = document.getElementById('extractedText-realtime').value.trim();
+            if (!extractedTextRealtime) {
+                event.preventDefault(); // Evita el envío del formulario
+                showError('No text has been extracted. Please capture an image and ensure text extraction is successful.');
+            } else {
+                hideError(); // Oculta el mensaje de error si todo está bien
+            }
+        });
     </script>
 </body>
 </html>
