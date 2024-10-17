@@ -1,4 +1,6 @@
-require('dotenv').config();
+// server.js
+
+require('dotenv').config(); // Cargar variables de entorno desde .env
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
@@ -8,193 +10,147 @@ const multer = require('multer');
 const tesseract = require('tesseract.js');
 const fs = require('fs');
 
-// Load service account credentials
+// Inicializar Firebase Admin SDK con las credenciales de la cuenta de servicio
 const serviceAccount = require('./formulario-531b6-firebase-adminsdk-1z5gl-dd144b687f.json');
 
-// Initialize Firebase Admin SDK
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: 'formulario-531b6.appspot.com',
+  storageBucket: 'formulario-531b6.appspot.com', // Asegúrate de que este nombre sea correcto
 });
 
-// Initialize Firestore and Storage
 const db = admin.firestore();
 const bucket = admin.storage().bucket();
 
-// Initialize Express
-const app = express();
-
-// Configure multer for image uploads (temporary storage)
-const upload = multer({
-  dest: 'uploads/',
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB limit
-  fileFilter: function (req, file, cb) {
-    const filetypes = /jpeg|jpg|png/;
-    const mimetype = filetypes.test(file.mimetype);
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    if (mimetype && extname) {
-      return cb(null, true);
-    }
-    cb(new Error('Only JPEG and PNG images are allowed'));
+// Configuración de multer para manejar múltiples campos de archivo (imagen y logo)
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); // Carpeta temporal para almacenar archivos subidos
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
   }
 });
 
+// Filtrar archivos para aceptar solo imágenes JPEG y PNG
+const fileFilter = function (req, file, cb) {
+  const filetypes = /jpeg|jpg|png/;
+  const mimetype = filetypes.test(file.mimetype);
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  if (mimetype && extname) {
+    return cb(null, true);
+  }
+  cb(new Error('Only JPEG and PNG images are allowed'));
+};
+
+// Inicializar multer con la configuración
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // Límite de 5 MB por archivo
+  fileFilter: fileFilter
+});
+
+// Inicializar Express
+const app = express();
+
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json({ limit: '10mb' })); // Increase limit if expecting large images
+app.use(bodyParser.json({ limit: '10mb' })); // Aumentar el límite si se esperan imágenes grandes
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Set EJS as the templating engine
+// Establecer EJS como motor de plantillas
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Route GET to serve the form
+// Ruta GET para servir el formulario principal
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
-// Route POST to extract text from an uploaded image
-app.post('/extract-text-upload', upload.single('image'), async (req, res) => {
-  try {
-    const imagePath = req.file.path;
-    console.log('Received file:', req.file);
+// Ruta GET para la página de agradecimiento
+app.get('/thankyou', (req, res) => {
+  res.sendFile(path.join(__dirname, 'views', 'thankyou.html'));
+});
 
-    // Use Tesseract.js to extract text from the image
+// Ruta POST unificada para manejar la subida de archivos (imagen y logo)
+app.post('/upload', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'logo', maxCount: 1 }]), async (req, res) => {
+  try {
+    const files = req.files;
+    const additionalNotes = req.body.additionalNotes || '';
+
+    // Validar que se haya subido una imagen para escaneo de texto
+    if (!files['image'] || files['image'].length === 0) {
+      return res.status(400).json({ error: 'No image uploaded for text extraction.' });
+    }
+
+    const imageFile = files['image'][0];
+    const imagePath = imageFile.path;
+
+    // Usar Tesseract.js para extraer texto de la imagen
     const { data: { text } } = await tesseract.recognize(imagePath, 'eng');
     console.log('Extracted text:', text);
 
-    // Delete the temporary image file after processing
+    // Eliminar el archivo de imagen temporal después del procesamiento
     fs.unlinkSync(imagePath);
 
-    // Return the extracted text as JSON
-    res.json({ extractedText: text });
-  } catch (error) {
-    console.error('Error processing image:', error);
-    res.status(500).json({ error: 'Error extracting text from image.' });
-  }
-});
+    let logoURL = '';
 
-// Route POST to extract text from a real-time captured image
-app.post('/extract-text-realtime', async (req, res) => {
-  try {
-    const { imageData } = req.body;
+    // Si se ha subido un logo, procesarlo
+    if (files['logo'] && files['logo'].length > 0) {
+      const logoFile = files['logo'][0];
+      const logoPath = logoFile.path;
+      const logoFileName = `logos/${Date.now()}_${logoFile.originalname}`;
+      const file = bucket.file(logoFileName);
 
-    if (!imageData) {
-      return res.status(400).json({ error: 'No image data provided.' });
-    }
+      // Subir el logo a Firebase Storage
+      await bucket.upload(logoPath, {
+        destination: logoFileName,
+        metadata: {
+          contentType: logoFile.mimetype,
+        },
+      });
 
-    // Decode the base64 image and save it temporarily
-    const base64Data = imageData.replace(/^data:image\/png;base64,/, "");
-    const imagePath = `uploads/realtime-${Date.now()}.png`;
-    fs.writeFileSync(imagePath, base64Data, 'base64');
+      // Hacer el archivo público (opcional, dependiendo de tu caso de uso)
+      await file.makePublic();
 
-    console.log('Received real-time image for scanning:', imagePath);
+      // Obtener la URL pública
+      logoURL = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
+      console.log('Uploaded logo to:', logoURL);
 
-    // Use Tesseract.js to extract text from the image
-    const { data: { text } } = await tesseract.recognize(imagePath, 'eng');
-    console.log('Extracted real-time text:', text);
-
-    // Delete the temporary image file after processing
-    fs.unlinkSync(imagePath);
-
-    // Return the extracted text as JSON
-    res.json({ extractedText: text });
-  } catch (error) {
-    console.error('Error processing real-time image:', error);
-    res.status(500).json({ error: 'Error extracting text from real-time image.' });
-  }
-});
-
-// Route POST to handle logo upload
-app.post('/upload-logo', upload.single('logo'), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No logo file uploaded.' });
-    }
-
-    const logoPath = req.file.path;
-    const logoFileName = `logos/${Date.now()}_${req.file.originalname}`;
-    const file = bucket.file(logoFileName);
-
-    // Upload the logo to Firebase Storage
-    await bucket.upload(logoPath, {
-      destination: logoFileName,
-      metadata: {
-        contentType: req.file.mimetype,
-      },
-    });
-
-    // Make the file public (optional, depending on your use case)
-    await file.makePublic();
-
-    // Get the public URL
-    const logoURL = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
-
-    console.log('Uploaded logo to:', logoURL);
-
-    // Delete the temporary logo file after uploading
-    fs.unlinkSync(logoPath);
-
-    // Return the logo URL
-    res.json({ logoURL });
-  } catch (error) {
-    console.error('Error uploading logo:', error);
-    res.status(500).json({ error: 'Error uploading logo.' });
-  }
-});
-
-// Route POST to handle form submission and save data to Firestore
-// Ruta POST para manejar el envío del formulario y guardar datos en Firestore
-app.post('/submit', upload.none(), async (req, res) => {
-  try {
-    // Obtener los datos del formulario
-    const { extractedText, additionalNotes, logoURL } = req.body;
-
-    // Verificar que 'extractedText' esté presente y no esté vacío
-    if (!extractedText || extractedText.trim() === "") {
-      // Puedes optar por redirigir al usuario con un mensaje de error
-      return res.status(400).send('No text has been extracted. Please upload an image and ensure text extraction is successful.');
-      
-      // Alternativamente, podrías redirigir al formulario con un mensaje de error usando query params o sesiones
-      // Por simplicidad, utilizaremos el mensaje directo aquí
+      // Eliminar el archivo temporal del servidor después de subir
+      fs.unlinkSync(logoPath);
     }
 
     // Crear una nueva entrada de cliente con los datos recibidos
     const client = {
-      extractedText: extractedText.trim(), // Texto extraído de la imagen
-      additionalNotes: additionalNotes || "",
+      extractedText: text.trim(), // Texto extraído de la imagen
+      additionalNotes: additionalNotes,
       submissionDate: admin.firestore.FieldValue.serverTimestamp(),
-      logoURL: logoURL || "", // URL del logo opcional
+      logoURL: logoURL, // URL del logo opcional
     };
 
     // Guardar el documento en Firestore
     await db.collection('clients').add(client);
 
-    // Redirigir al usuario a la página de "Gracias"
-    res.redirect('/thankyou');
+    // Responder con éxito y el texto extraído
+    res.json({ message: 'Form submitted successfully.', extractedText: text.trim() });
   } catch (error) {
-    console.error('Error submitting form:', error);
-    res.status(500).send('There was an error submitting the form.');
+    console.error('Error uploading files:', error);
+    res.status(500).json({ error: 'There was an error uploading the files.' });
   }
 });
 
-
-// Route GET for the "Thank You" page
-app.get('/thankyou', (req, res) => {
-  res.sendFile(path.join(__dirname, 'views', 'thankyou.html'));
-});
-
-// Configure basic authentication for the /admin route
+// Ruta GET para el panel administrativo (protegido con autenticación básica)
 app.use(
   '/admin',
   basicAuth({
-    users: { admin: '1234' }, // Access credentials (change for production)
+    users: { admin: process.env.ADMIN_PASS || '1234' }, // Cambia esto para producción
     challenge: true,
     realm: 'Firestore Administration',
   })
 );
 
-// Route GET for the administrative page
+// Ruta GET para la página administrativa
 app.get('/admin', async (req, res) => {
   try {
     const snapshot = await db.collection('clients').orderBy('submissionDate', 'desc').get();
@@ -209,7 +165,7 @@ app.get('/admin', async (req, res) => {
   }
 });
 
-// General error handling middleware
+// Middleware de manejo de errores generales
 app.use((err, req, res, next) => {
   if (err) {
     console.error('General Error:', err);
@@ -218,7 +174,7 @@ app.use((err, req, res, next) => {
   next();
 });
 
-// Start the server
+// Iniciar el servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
