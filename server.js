@@ -72,11 +72,10 @@ app.get('/thankyou', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'thankyou.html'));
 });
 
-// Ruta POST unificada para manejar la subida de archivos (imagen y logo)
-app.post('/upload', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'logo', maxCount: 1 }]), async (req, res) => {
+// Ruta POST para extraer el texto de la imagen
+app.post('/extract', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'logo', maxCount: 1 }]), async (req, res) => {
   try {
     const files = req.files;
-    const additionalNotes = req.body.additionalNotes || '';
 
     // Validar que se haya subido una imagen para escaneo de texto
     if (!files['image'] || files['image'].length === 0) {
@@ -121,10 +120,57 @@ app.post('/upload', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'logo
       fs.unlinkSync(logoPath);
     }
 
+    // Devolver el texto extraído y la URL del logo si existe
+    res.json({ extractedText: text.trim(), logoURL: logoURL });
+  } catch (error) {
+    console.error('Error extracting text:', error);
+    res.status(500).json({ error: 'There was an error extracting text from the image.' });
+  }
+});
+
+// Ruta POST para guardar los datos en Firestore
+app.post('/upload', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'logo', maxCount: 1 }]), async (req, res) => {
+  try {
+    const { extractedText, additionalNotes } = req.body;
+    const files = req.files;
+
+    // Validar que se haya proporcionado el texto extraído
+    if (!extractedText) {
+      return res.status(400).json({ error: 'No extracted text provided.' });
+    }
+
+    let logoURL = '';
+
+    // Si se ha subido un logo, procesarlo
+    if (files['logo'] && files['logo'].length > 0) {
+      const logoFile = files['logo'][0];
+      const logoPath = logoFile.path;
+      const logoFileName = `logos/${Date.now()}_${logoFile.originalname}`;
+      const file = bucket.file(logoFileName);
+
+      // Subir el logo a Firebase Storage
+      await bucket.upload(logoPath, {
+        destination: logoFileName,
+        metadata: {
+          contentType: logoFile.mimetype,
+        },
+      });
+
+      // Hacer el archivo público (opcional, dependiendo de tu caso de uso)
+      await file.makePublic();
+
+      // Obtener la URL pública
+      logoURL = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
+      console.log('Uploaded logo to:', logoURL);
+
+      // Eliminar el archivo temporal del servidor después de subir
+      fs.unlinkSync(logoPath);
+    }
+
     // Crear una nueva entrada de cliente con los datos recibidos
     const client = {
-      extractedText: text.trim(), // Texto extraído de la imagen
-      additionalNotes: additionalNotes,
+      extractedText: extractedText.trim(), // Texto extraído de la imagen
+      additionalNotes: additionalNotes || '',
       submissionDate: admin.firestore.FieldValue.serverTimestamp(),
       logoURL: logoURL, // URL del logo opcional
     };
@@ -132,11 +178,11 @@ app.post('/upload', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'logo
     // Guardar el documento en Firestore
     await db.collection('clients').add(client);
 
-    // Responder con éxito y el texto extraído
-    res.json({ message: 'Form submitted successfully.', extractedText: text.trim() });
+    // Responder con éxito
+    res.json({ message: 'Form submitted successfully.' });
   } catch (error) {
-    console.error('Error uploading files:', error);
-    res.status(500).json({ error: 'There was an error uploading the files.' });
+    console.error('Error uploading data:', error);
+    res.status(500).json({ error: 'There was an error saving your data.' });
   }
 });
 

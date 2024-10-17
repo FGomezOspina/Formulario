@@ -17,7 +17,7 @@
     </header>
     <main>
         <!-- Unified Upload Form (Visible por defecto) -->
-        <form id="upload-form" action="/upload" method="POST" enctype="multipart/form-data">
+        <form id="upload-form" enctype="multipart/form-data">
             <!-- Image upload section -->
             <section class="company">
                 <h2>Upload Business Card or Image</h2>
@@ -37,7 +37,7 @@
                     <input type="file" id="logo-upload" name="logo" accept="image/*">
                 </div>
                 <!-- Logo preview -->
-                <img id="logo-preview-upload" src="#" alt="Logo Preview" style="display: none; width: 50px; height: 50px;">
+                <img id="logo-preview-upload" src="#" alt="Logo Preview" style="display: none; height: 50px; width: auto;">
             </section>
 
             <!-- Extracted text section -->
@@ -56,7 +56,8 @@
                 <textarea id="additionalNotes-upload" name="additionalNotes" rows="6" placeholder="Enter your additional notes here..."></textarea>
             </section>
 
-            <button type="submit" class="submit-btn">Submit</button>
+            <!-- Botón para Enviar el Formulario -->
+            <button type="submit" id="submit-btn" class="submit-btn" disabled>Submit</button>
         </form>
 
         <div id="error-message" style="display: none; color: red; text-align: center; margin-bottom: 20px;"></div>
@@ -67,16 +68,13 @@
     </footer>
 
     <script>
-        // ----------- Manejo de Subida de Imagen en el Formulario de Upload -----------
-        document.getElementById('image-upload').addEventListener('change', async function () {
+        // ----------- Manejo de Previsualización de Imagen -----------
+        document.getElementById('image-upload').addEventListener('change', function () {
             const fileInput = document.getElementById('image-upload');
-            const errorMessage = document.getElementById('error-message');
-            const extractedText = document.getElementById('extractedText-upload');
             const imagePreview = document.getElementById('image-preview-upload');
 
             if (fileInput.files.length === 0) {
-                errorMessage.textContent = "Please upload an image.";
-                errorMessage.style.display = 'block';
+                imagePreview.style.display = 'none';
                 return;
             }
 
@@ -88,44 +86,16 @@
             }
             reader.readAsDataURL(fileInput.files[0]);
 
-            // Preparar FormData para enviar al servidor
-            const formData = new FormData();
-            formData.append('image', fileInput.files[0]);
-            const logoInput = document.getElementById('logo-upload');
-            if (logoInput.files.length > 0) {
-                formData.append('logo', logoInput.files[0]);
-            }
-
-            try {
-                // Enviar los archivos al servidor
-                const response = await fetch('/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    const errorRes = await response.json();
-                    throw new Error(errorRes.error || 'Error processing the image.');
-                }
-
-                const result = await response.json();
-                // Asignar el texto extraído recibido del servidor
-                extractedText.value = result.extractedText || "Text extracted successfully.";
-                errorMessage.style.display = 'none';
-            } catch (error) {
-                console.error('Error processing the image:', error);
-                errorMessage.textContent = 'Error extracting text from the image.';
-                errorMessage.style.display = 'block';
-            }
+            // Iniciar la extracción automática de texto
+            extractText();
         });
 
-        // ----------- Manejo de Subida de Logo en el Formulario de Upload -----------
+        // ----------- Manejo de Previsualización de Logo -----------
         document.getElementById('logo-upload').addEventListener('change', function () {
             const logoInput = document.getElementById('logo-upload');
             const logoPreview = document.getElementById('logo-preview-upload');
 
             if (logoInput.files.length === 0) {
-                // No se subió ningún logo
                 logoPreview.style.display = 'none';
                 return;
             }
@@ -139,28 +109,71 @@
             reader.readAsDataURL(logoInput.files[0]);
         });
 
+        // ----------- Función para Extraer Texto Automáticamente -----------
+        async function extractText() {
+            const form = document.getElementById('upload-form');
+            const formData = new FormData(form);
+            const errorMessage = document.getElementById('error-message');
+            const extractedText = document.getElementById('extractedText-upload');
+            const submitBtn = document.getElementById('submit-btn');
+
+            try {
+                // Enviar los archivos al servidor para extraer el texto
+                const response = await fetch('/extract', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorRes = await response.json();
+                    throw new Error(errorRes.error || 'Error processing the image.');
+                }
+
+                const result = await response.json();
+
+                // Asignar el texto extraído recibido del servidor
+                extractedText.value = result.extractedText || "Text extracted successfully.";
+                errorMessage.style.display = 'none';
+
+                // Habilitar el botón de envío
+                submitBtn.disabled = false;
+            } catch (error) {
+                console.error('Error extracting text:', error);
+                errorMessage.textContent = 'Error extracting text from the image.';
+                errorMessage.style.display = 'block';
+                extractedText.value = '';
+                // Deshabilitar el botón de envío si hay un error
+                submitBtn.disabled = true;
+            }
+        }
+
         // ----------- Manejo de Envío del Formulario -----------
-        // Funciones para mostrar y ocultar mensajes de error
-        function showError(message) {
-            const errorMessage = document.getElementById('error-message');
-            errorMessage.textContent = message;
-            errorMessage.style.display = 'block';
-        }
+        document.getElementById('upload-form').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Evita el envío tradicional del formulario
 
-        function hideError() {
+            const form = event.target;
+            const formData = new FormData(form);
             const errorMessage = document.getElementById('error-message');
-            errorMessage.textContent = '';
-            errorMessage.style.display = 'none';
-        }
 
-        // Validación antes de enviar el formulario de upload
-        document.getElementById('upload-form').addEventListener('submit', function(event) {
-            const extractedText = document.getElementById('extractedText-upload').value.trim();
-            if (!extractedText) {
-                event.preventDefault(); // Evita el envío del formulario
-                showError('No text has been extracted. Please upload an image and ensure text extraction is successful.');
-            } else {
-                hideError(); // Oculta el mensaje de error si todo está bien
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorRes = await response.json();
+                    throw new Error(errorRes.error || 'Error submitting the form.');
+                }
+
+                const result = await response.json();
+
+                // Redirigir a la página de agradecimiento
+                window.location.href = '/thankyou';
+            } catch (error) {
+                console.error('Error submitting the form:', error);
+                errorMessage.textContent = 'Error submitting the form.';
+                errorMessage.style.display = 'block';
             }
         });
     </script>
