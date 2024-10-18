@@ -94,7 +94,7 @@ h2 {
 .notes textarea {
     padding-top: 10px;
     height: 150px; /* Tamaño fijo */
-    width: 750px;
+    width: 550px;
     resize: none;  
 }
 
@@ -192,7 +192,7 @@ footer {
     .notes textarea {
         padding-top: 10px;
         height: 150px; /* Tamaño fijo */
-        width: 350px;
+        width: 300px;
         resize: none;  
     }
 

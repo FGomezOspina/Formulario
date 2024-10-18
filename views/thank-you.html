@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Thank You for Contacting Us!</title>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 90%;
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        h1, h2 {
+            color: #007BFF;
+        }
+        p {
+            line-height: 1.6;
+        }
+        /* Estilos para la tabla de productos */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th {
+            background-color: #007BFF;
+            color: #ffffff;
+            padding: 10px;
+            text-align: left;
+        }
+        td {
+            border: 1px solid #dddddd;
+            padding: 10px;
+            vertical-align: top;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        img.product-image {
+            width: 100px;
+            height: auto;
+            border-radius: 4px;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #777777;
+            font-size: 12px;
+        }
+        /* Estilos para enlaces */
+        a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="/public/images/logo.jpeg" style="display: none; height: 100px; width: 100;">
+        <h1>Thank You for Contacting Us!</h1>
+        <p>We have received your request and will respond shortly.</p>
+        <p>Below, you will find information about the products we offer:</p>
+        
+        <!-- Placeholder para productos -->
+        <div class="products">
+            {{products}}
+        </div>
+        
+        <p>If you have any additional questions, please feel free to reply to this email.</p>
+        <p>Best regards,</p>
+        <p><strong>Major Farm Direct</strong></p>
+        <div class="footer">
+            <p>&copy; 2024 Major FD S.A.S All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
