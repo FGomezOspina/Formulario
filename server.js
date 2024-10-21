@@ -68,6 +68,20 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+// Definir productos prioritarios por SKU y nombre
+const productosPrioritarios = [
+    { sku: '00015', name: 'Producto 00015' },
+    { sku: '00014', name: 'Producto 00014' },
+    { sku: null, name: 'Dracaena Reflexa' },
+    { sku: null, name: 'Heliconia SP' },
+    { sku: '00012', name: 'Producto 00012' },
+    { sku: null, name: 'Lobster Salmon' },
+    { sku: null, name: 'Orthotricha Tricolor' }
+];
+
+// Definir el orden de categorías
+const ordenCategorias = ['Foliages', 'Tropical Flowers', 'Hydrangeas'];
+
 // Función para obtener productos de Ecwid
 async function fetchEcwidProducts() {
     try {
@@ -82,7 +96,7 @@ async function fetchEcwidProducts() {
                 offset: 0
             }
         });
-        console.log('Respuesta de la API de Ecwid:', JSON.stringify(response.data, null, 2)); // Añade esta línea para depuración
+        console.log('Respuesta de la API de Ecwid:', JSON.stringify(response.data, null, 2)); // Depuración
         return response.data.items; // Ajusta según la respuesta de la API
     } catch (error) {
         console.error('Error al obtener productos de Ecwid:', error.response ? error.response.data : error.message);
@@ -90,20 +104,65 @@ async function fetchEcwidProducts() {
     }
 }
 
+// Función para ordenar los productos
+function ordenarProductos(productos, prioritarios, ordenCategorias) {
+    const productosOrdenados = [];
+
+    // Crear copias para manipulación
+    let productosRestantes = [...productos];
+
+    // 1. Añadir productos prioritarios en el orden definido
+    prioritarios.forEach(prioritario => {
+        let index = -1;
+
+        if (prioritario.sku) {
+            index = productosRestantes.findIndex(p => p.sku === prioritario.sku);
+        } else if (prioritario.name) {
+            index = productosRestantes.findIndex(p => p.name === prioritario.name);
+        }
+
+        if (index !== -1) {
+            productosOrdenados.push(productosRestantes[index]);
+            productosRestantes.splice(index, 1); // Eliminar del arreglo restante
+        } else {
+            console.warn(`Producto prioritario no encontrado: ${prioritario.sku || prioritario.name}`);
+        }
+    });
+
+    // 2. Agrupar productos por categorías en el orden definido
+    ordenCategorias.forEach(categoria => {
+        const productosCategoria = productosRestantes.filter(p => p.categories && p.categories.some(cat => cat.name === categoria));
+
+        // Ordenar alfabéticamente dentro de la categoría (opcional)
+        productosCategoria.sort((a, b) => a.name.localeCompare(b.name));
+
+        productosOrdenados.push(...productosCategoria);
+
+        // Eliminar los productos añadidos del arreglo restante
+        productosRestantes = productosRestantes.filter(p => !(p.categories && p.categories.some(cat => cat.name === categoria)));
+    });
+
+    // 3. Añadir cualquier otro producto que no esté en las categorías especificadas
+    productosRestantes.sort((a, b) => a.name.localeCompare(b.name)); // Ordenar alfabéticamente
+    productosOrdenados.push(...productosRestantes);
+
+    return productosOrdenados;
+}
+
 // Función para generar HTML de los productos
 function generateProductsHTML(products) {
     if (products.length === 0) {
-        return '<p>No hay productos disponibles en este momento.</p>';
+        return '<p>No products are available at this time.</p>';
     }
 
     let html = `
-        <h2>Avalaible Products</h2>
+        <h2>Available Products:</h2>
         <table>
             <tr>
                 <th>Image</th>
                 <th>Name</th>
                 <th>Price</th>
-                <th>Go to web</th>
+                <th>View Product</th>
             </tr>
     `;
     
@@ -129,7 +188,7 @@ function generateProductsHTML(products) {
                 <td>${imageUrl ? `<img src="${imageUrl}" alt="${product.name}" class="product-image">` : 'N/A'}</td>
                 <td>${product.name}</td>
                 <td>$${product.price} ${product.currency}</td>
-                <td><a href="${productUrl}">Show Product</a></td>
+                <td><a href="${productUrl}">View Product</a></td>
             </tr>
         `;
     });
@@ -142,22 +201,31 @@ function generateProductsHTML(products) {
 async function sendThankYouEmail(toEmail) {
     try {
         // Obtener productos de Ecwid
-        const products = await fetchEcwidProducts();
-        const productsHTML = generateProductsHTML(products);
+        let productos = await fetchEcwidProducts();
+        
+        // Ordenar los productos
+        productos = ordenarProductos(productos, productosPrioritarios, ordenCategorias);
+        
+        // Generar el HTML de los productos
+        const productsHTML = generateProductsHTML(productos);
         
         // Leer la plantilla HTML
         const templatePath = path.join(__dirname, 'views', 'thank-you.html');
         let htmlContent = fs.readFileSync(templatePath, 'utf-8');
         
-        // Insertar el HTML de productos en el contenido del correo
+        // Reemplazar los placeholders con contenido real
         htmlContent = htmlContent.replace('{{products}}', productsHTML);
+        
+        // Reemplazar el placeholder del logo con la URL real
+        const logoUrl = 'https://firebasestorage.googleapis.com/v0/b/formulario-531b6.appspot.com/o/logo.jpeg?alt=media&token=202ee807-bd5c-44ac-9b1e-ce443cb11837';
+        htmlContent = htmlContent.replace('{{logo}}', logoUrl);
         
         // Configurar las opciones del correo
         const msg = {
             to: toEmail,
             from: 'info@fli.com.co', // Remitente verificado en SendGrid
             replyTo: 'soporte@fli.com.co', // Dirección para recibir respuestas
-            subject: '¡Thanks for contacting us!',
+            subject: 'Thank You for Contacting Us!',
             html: htmlContent,
         };
         
@@ -349,5 +417,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-

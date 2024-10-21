@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en"> <!-- Cambiar a "es" si prefieres mantener el idioma en español -->
 <head>
     <meta charset="UTF-8">
-    <title>Thank You for Contacting Us!</title>
-    <link rel="stylesheet" href="/css/styles.css">
+    <title>Thank You for Contacting Us</title>
     <style>
-        /* Estilos generales */
+        /* General Styles */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
@@ -27,7 +26,7 @@
         p {
             line-height: 1.6;
         }
-        /* Estilos para la tabla de productos */
+        /* Styles for the products table */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -58,7 +57,7 @@
             color: #777777;
             font-size: 12px;
         }
-        /* Estilos para enlaces */
+        /* Styles for links */
         a {
             color: #007BFF;
             text-decoration: none;
@@ -66,21 +65,26 @@
         a:hover {
             text-decoration: underline;
         }
-
+        /* Header Styles */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
         .header img {
-            max-width: 200px; /* Adjust as needed */
+            max-width: 200px; /* Ajusta según sea necesario */
             height: auto;
         }
-
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Header con el Logo -->
         <div class="header">
-            <a href="https://majorfd.com"> <!-- Replace with your website URL -->
-                <img src="https://firebasestorage.googleapis.com/v0/b/formulario-531b6.appspot.com/o/logo.jpeg?alt=media&token=202ee807-bd5c-44ac-9b1e-ce443cb11837" alt="Your Company Logo">
+            <a href="https://majorfd.com"> <!-- Reemplaza con la URL de tu sitio web -->
+                <img src="{{logo}}" alt="Your Company Logo">
             </a>
         </div>
+
         <h1>Thank You for Contacting Us!</h1>
         <p>We have received your request and will respond shortly.</p>
         <p>Below, you will find information about the products we offer:</p>
@@ -92,9 +96,10 @@
         
         <p>If you have any additional questions, please feel free to reply to this email.</p>
         <p>Best regards,</p>
-        <p><strong>Major Farm Direct</strong></p>
+        <p><strong>Your Company</strong></p>
+        
         <div class="footer">
-            <p>&copy; 2024 Major FD S.A.S All rights reserved.</p>
+            <p>&copy; 2024 Your Company. All rights reserved.</p>
         </div>
     </div>
 </body>
