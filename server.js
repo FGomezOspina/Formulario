@@ -157,7 +157,7 @@ async function sendThankYouEmail(toEmail) {
             to: toEmail,
             from: 'info@fli.com.co', // Remitente verificado en SendGrid
             replyTo: 'soporte@fli.com.co', // Dirección para recibir respuestas
-            subject: '¡Gracias por Contactarnos!',
+            subject: '¡Thanks for contacting us!',
             html: htmlContent,
         };
         
