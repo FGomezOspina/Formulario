@@ -70,11 +70,11 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Definir productos prioritarios por SKU y nombre
 const productosPrioritarios = [
-    { sku: '00015', name: 'Producto 00015' },
-    { sku: '00014', name: 'Producto 00014' },
+    { sku: '00015', name: '00015' },
+    { sku: '00014', name: '00014' },
     { sku: null, name: 'Dracaena Reflexa' },
     { sku: null, name: 'Heliconia SP' },
-    { sku: '00012', name: 'Producto 00012' },
+    { sku: '00012', name: '00012' },
     { sku: null, name: 'Lobster Salmon' },
     { sku: null, name: 'Orthotricha Tricolor' }
 ];
@@ -101,6 +101,24 @@ async function fetchEcwidProducts() {
     } catch (error) {
         console.error('Error al obtener productos de Ecwid:', error.response ? error.response.data : error.message);
         return [];
+    }
+}
+
+// Función para obtener la configuración del store
+async function fetchStoreSettings() {
+    try {
+        const storeId = process.env.ECWID_STORE_ID;
+        const apiToken = process.env.ECWID_API_TOKEN;
+        const response = await axios.get(`https://app.ecwid.com/api/v3/${storeId}/settings`, {
+            headers: {
+                'Authorization': `Bearer ${apiToken}`
+            }
+        });
+        console.log('Store Settings:', JSON.stringify(response.data, null, 2)); // Depuración
+        return response.data;
+    } catch (error) {
+        console.error('Error al obtener la configuración del store:', error.response ? error.response.data : error.message);
+        return null;
     }
 }
 
@@ -150,7 +168,7 @@ function ordenarProductos(productos, prioritarios, ordenCategorias) {
 }
 
 // Función para generar HTML de los productos
-function generateProductsHTML(products) {
+function generateProductsHTML(products, currency) {
     if (products.length === 0) {
         return '<p>No products are available at this time.</p>';
     }
@@ -187,7 +205,7 @@ function generateProductsHTML(products) {
             <tr>
                 <td>${imageUrl ? `<img src="${imageUrl}" alt="${product.name}" class="product-image">` : 'N/A'}</td>
                 <td>${product.name}</td>
-                <td>$${product.price} ${product.currency}</td>
+                <td>${currency} ${product.price}</td>
                 <td><a href="${productUrl}">View Product</a></td>
             </tr>
         `;
@@ -202,12 +220,16 @@ async function sendThankYouEmail(toEmail) {
     try {
         // Obtener productos de Ecwid
         let productos = await fetchEcwidProducts();
-        
+
+        // Obtener configuración del store para la moneda
+        const storeSettings = await fetchStoreSettings();
+        const storeCurrency = storeSettings && storeSettings.currency ? storeSettings.currency : 'USD'; // Valor por defecto 'USD'
+
         // Ordenar los productos
         productos = ordenarProductos(productos, productosPrioritarios, ordenCategorias);
         
         // Generar el HTML de los productos
-        const productsHTML = generateProductsHTML(productos);
+        const productsHTML = generateProductsHTML(productos, storeCurrency);
         
         // Leer la plantilla HTML
         const templatePath = path.join(__dirname, 'views', 'thank-you.html');
@@ -217,7 +239,7 @@ async function sendThankYouEmail(toEmail) {
         htmlContent = htmlContent.replace('{{products}}', productsHTML);
         
         // Reemplazar el placeholder del logo con la URL real
-        const logoUrl = 'https://firebasestorage.googleapis.com/v0/b/formulario-531b6.appspot.com/o/logo.jpeg?alt=media&token=202ee807-bd5c-44ac-9b1e-ce443cb11837';
+        const logoUrl = 'https://firebasestorage.googleapis.com/v0/b/tu-proyecto.appspot.com/o/logos%2Ftu-logo.png?alt=media&token=token-unico';
         htmlContent = htmlContent.replace('{{logo}}', logoUrl);
         
         // Configurar las opciones del correo
