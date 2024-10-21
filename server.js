@@ -129,7 +129,7 @@ function generateProductsHTML(products) {
                 <td>${imageUrl ? `<img src="${imageUrl}" alt="${product.name}" class="product-image">` : 'N/A'}</td>
                 <td>${product.name}</td>
                 <td>$${product.price} ${product.currency}</td>
-                <td><a href="${productUrl}">Ver Producto</a></td>
+                <td><a href="${productUrl}">Show Product</a></td>
             </tr>
         `;
     });
