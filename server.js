@@ -239,7 +239,7 @@ async function sendThankYouEmail(toEmail) {
         htmlContent = htmlContent.replace('{{products}}', productsHTML);
         
         // Reemplazar el placeholder del logo con la URL real
-        const logoUrl = 'https://firebasestorage.googleapis.com/v0/b/tu-proyecto.appspot.com/o/logos%2Ftu-logo.png?alt=media&token=token-unico';
+        const logoUrl = 'https://firebasestorage.googleapis.com/v0/b/formulario-531b6.appspot.com/o/logo.jpeg?alt=media&token=202ee807-bd5c-44ac-9b1e-ce443cb11837';
         htmlContent = htmlContent.replace('{{logo}}', logoUrl);
         
         // Configurar las opciones del correo
