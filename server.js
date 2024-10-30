@@ -80,7 +80,43 @@ const productosPrioritarios = [
 ];
 
 // Definir el orden de categorías
-const ordenCategorias = ['Foliages', 'Tropical Flowers', 'Hydrangeas'];
+const ordenCategorias = ['Foliages', 'Tropical Flowers'];
+
+// Definir categorías excluidas
+const excludedCategories = ['Hydrangeas'];
+
+// Definir nombres de productos a excluir
+const excludedProductNames = [
+    'Appaloosa B-DB',
+    'Appaloosa SB-R-W',
+    'Appaloosa SB-W',
+    'Bouquets Boxes',
+    'Cocculus laurifolius',
+    'Exotic Greens BQT',
+    'Fancy Green BQT',
+    'Freedom Rose',
+    'Ginger Shampoo BQ',
+    'Grace BQT',
+    'Hydrangea Blue Extra',
+    'Hydrangea Blue Jumbo',
+    'Hydrangea Blue Petite',
+    'Hydrangea Blue Premium',
+    'Hydrangea Blue Select',
+    'Hydrangea Blue Super',
+    'Hydrangea Mini Blue',
+    'Hydrangea Mini White',
+    'Hydrangea White Extra',
+    'Hydrangea White Giant',
+    'Hydrangea White Jumbo',
+    'Hydrangea White Petite',
+    'Hydrangea White Premium',
+    'Ivy BQT',
+    'Marsella\'s Beauty BQT',
+    'Rainbow BQT',
+    'Shadow B-P',
+    'Shadow B-W',
+    'White'
+];
 
 // Función para obtener productos de Ecwid
 async function fetchEcwidProducts() {
@@ -209,12 +245,22 @@ function generateProductsHTML(products) {
   return html;
 }
 
-// Actualizar la llamada a la función sin el parámetro 'currency'
 async function sendThankYouEmail(toEmail) {
   try {
       let productos = await fetchEcwidProducts();
       const storeSettings = await fetchStoreSettings();
-      // const storeCurrency = storeSettings && storeSettings.currency ? storeSettings.currency : 'USD'; // Ya no se usa
+
+      // Filtrar productos para excluir las categorías definidas en excludedCategories
+      productos = productos.filter(product => {
+          if (!product.categories) return true; // Si no tiene categorías, se incluye
+          return !product.categories.some(cat => excludedCategories.includes(cat.name));
+      });
+
+      // Filtrar productos para excluir los nombres especificados en excludedProductNames
+      productos = productos.filter(product => {
+          if (!product.name) return true; // Si no tiene nombre, se incluye
+          return !excludedProductNames.includes(product.name.trim());
+      });
 
       productos = ordenarProductos(productos, productosPrioritarios, ordenCategorias);
       const productsHTML = generateProductsHTML(productos);
@@ -230,7 +276,7 @@ async function sendThankYouEmail(toEmail) {
       const msg = {
           to: toEmail,
           from: 'info@fli.com.co',
-          replyTo: 'soporte@fli.com.co',
+          replyTo: 'info@fli.com.co',
           subject: 'Thank You for Contacting Us!',
           html: htmlContent,
       };
@@ -241,6 +287,7 @@ async function sendThankYouEmail(toEmail) {
       console.error(`Error al enviar el correo a ${toEmail}:`, error.response ? error.response.body : error.message);
   }
 }
+
 
 // Ruta GET para servir el formulario principal
 app.get('/', (req, res) => {
