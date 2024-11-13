@@ -68,7 +68,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Definir productos prioritarios por SKU y nombre
+// Definir productos prioritarios por SKU y nombre (si es necesario)
 const productosPrioritarios = [
     { sku: '00015', name: '00015' },
     { sku: '00014', name: '00014' },
@@ -79,13 +79,13 @@ const productosPrioritarios = [
     { sku: null, name: 'Orthotricha Tricolor' }
 ];
 
-// Definir el orden de categorías
+// Definir el orden de categorías (si es necesario)
 const ordenCategorias = ['Foliages', 'Tropical Flowers'];
 
-// Definir categorías excluidas
+// Definir categorías excluidas (si es necesario)
 const excludedCategories = ['Hydrangeas'];
 
-// Definir nombres de productos a excluir
+// Definir nombres de productos a excluir (si es necesario)
 const excludedProductNames = [
     'Appaloosa B-DB',
     'Appaloosa SB-R-W',
@@ -118,7 +118,7 @@ const excludedProductNames = [
     'White'
 ];
 
-// Función para obtener productos de Ecwid
+// Función para obtener productos de Ecwid (si es necesario)
 async function fetchEcwidProducts() {
     try {
         const storeId = process.env.ECWID_STORE_ID;
@@ -140,7 +140,7 @@ async function fetchEcwidProducts() {
     }
 }
 
-// Función para obtener la configuración del store
+// Función para obtener la configuración del store (si es necesario)
 async function fetchStoreSettings() {
     try {
         const storeId = process.env.ECWID_STORE_ID;
@@ -158,7 +158,7 @@ async function fetchStoreSettings() {
     }
 }
 
-// Función para ordenar los productos
+// Función para ordenar los productos (si es necesario)
 function ordenarProductos(productos, prioritarios, ordenCategorias) {
     const productosOrdenados = [];
 
@@ -203,7 +203,7 @@ function ordenarProductos(productos, prioritarios, ordenCategorias) {
     return productosOrdenados;
 }
 
-// Función modificada para generar HTML de los productos sin la columna de precios
+// Función modificada para generar HTML de los productos sin la columna de precios (si es necesario)
 function generateProductsHTML(products) {
   if (products.length === 0) {
       return '<p>No products are available at this time.</p>';
@@ -245,6 +245,7 @@ function generateProductsHTML(products) {
   return html;
 }
 
+// Función para enviar el correo de agradecimiento
 async function sendThankYouEmail(toEmail) {
   try {
       let productos = await fetchEcwidProducts();
@@ -277,7 +278,7 @@ async function sendThankYouEmail(toEmail) {
           to: toEmail,
           from: 'info@fli.com.co',
           replyTo: 'info@fli.com.co',
-          subject: 'Thank You for Contacting Us!',
+          subject: '¡Gracias por Contactarnos!',
           html: htmlContent,
       };
       
@@ -287,7 +288,6 @@ async function sendThankYouEmail(toEmail) {
       console.error(`Error al enviar el correo a ${toEmail}:`, error.response ? error.response.body : error.message);
   }
 }
-
 
 // Ruta GET para servir el formulario principal
 app.get('/', (req, res) => {
@@ -300,58 +300,63 @@ app.get('/thankyou', (req, res) => {
 });
 
 // Ruta POST para extraer el texto de la imagen
-app.post('/extract', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'logo', maxCount: 1 }]), async (req, res) => {
+app.post('/extract', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'logo', maxCount: 1 }, { name: 'manual-logo-upload', maxCount: 1 }]), async (req, res) => {
   try {
     const files = req.files;
 
-    // Validar que se haya subido una imagen para escaneo de texto
-    if (!files['image'] || files['image'].length === 0) {
-      return res.status(400).json({ error: 'No image uploaded for text extraction.' });
+    // Validar que se haya subido una imagen para escaneo de texto (solo para método 'card')
+    if (req.body.method === 'card') {
+      if (!files['image'] || files['image'].length === 0) {
+        return res.status(400).json({ error: 'No image uploaded for text extraction.' });
+      }
+
+      const imageFile = files['image'][0];
+      const imagePath = imageFile.path;
+
+      // Usar Tesseract.js para extraer texto de la imagen
+      const { data: { text } } = await tesseract.recognize(imagePath, 'eng');
+      console.log('Extracted text:', text);
+
+      // Eliminar el archivo de imagen temporal después del procesamiento
+      fs.unlinkSync(imagePath);
+
+      let logoURL = '';
+
+      // Si se ha subido un logo, procesarlo
+      if (files['logo'] && files['logo'].length > 0) {
+        const logoFile = files['logo'][0];
+        const logoPath = logoFile.path;
+        const logoFileName = `logos/${Date.now()}_${logoFile.originalname}`;
+        const file = bucket.file(logoFileName);
+
+        // Subir el logo a Firebase Storage
+        await bucket.upload(logoPath, {
+          destination: logoFileName,
+          metadata: {
+            contentType: logoFile.mimetype,
+          },
+        });
+
+        // Hacer el archivo público (opcional, dependiendo de tu caso de uso)
+        await file.makePublic();
+
+        // Obtener la URL pública
+        logoURL = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
+        console.log('Uploaded logo to:', logoURL);
+
+        // Eliminar el archivo temporal del servidor después de subir
+        fs.unlinkSync(logoPath);
+      }
+
+      // Limpiar el texto extraído
+      const cleanedText = text.replace(/[^a-zA-Z0-9@.,\s-]/g, '').replace(/\s+/g, ' ').trim();
+
+      // Devolver el texto extraído y la URL del logo si existe
+      res.json({ extractedText: cleanedText, logoURL: logoURL });
+    } else {
+      // Para método 'manual', no se requiere extracción de texto
+      res.json({ extractedText: '', logoURL: '' });
     }
-
-    const imageFile = files['image'][0];
-    const imagePath = imageFile.path;
-
-    // Usar Tesseract.js para extraer texto de la imagen
-    const { data: { text } } = await tesseract.recognize(imagePath, 'eng');
-    console.log('Extracted text:', text);
-
-    // Eliminar el archivo de imagen temporal después del procesamiento
-    fs.unlinkSync(imagePath);
-
-    let logoURL = '';
-
-    // Si se ha subido un logo, procesarlo
-    if (files['logo'] && files['logo'].length > 0) {
-      const logoFile = files['logo'][0];
-      const logoPath = logoFile.path;
-      const logoFileName = `logos/${Date.now()}_${logoFile.originalname}`;
-      const file = bucket.file(logoFileName);
-
-      // Subir el logo a Firebase Storage
-      await bucket.upload(logoPath, {
-        destination: logoFileName,
-        metadata: {
-          contentType: logoFile.mimetype,
-        },
-      });
-
-      // Hacer el archivo público (opcional, dependiendo de tu caso de uso)
-      await file.makePublic();
-
-      // Obtener la URL pública
-      logoURL = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
-      console.log('Uploaded logo to:', logoURL);
-
-      // Eliminar el archivo temporal del servidor después de subir
-      fs.unlinkSync(logoPath);
-    }
-
-    // Limpiar el texto extraído
-    const cleanedText = text.replace(/[^a-zA-Z0-9@.,\s-]/g, '').replace(/\s+/g, ' ').trim();
-
-    // Devolver el texto extraído y la URL del logo si existe
-    res.json({ extractedText: cleanedText, logoURL: logoURL });
   } catch (error) {
     console.error('Error extracting text:', error);
     res.status(500).json({ error: 'There was an error extracting text from the image.' });
@@ -359,17 +364,19 @@ app.post('/extract', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'log
 });
 
 // Ruta POST para guardar los datos en Firestore
-app.post('/upload', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'logo', maxCount: 1 }]), async (req, res) => {
+app.post('/upload', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'logo', maxCount: 1 }, { name: 'manual-logo-upload', maxCount: 1 }]), async (req, res) => {
   try {
-    const { extractedText, additionalNotes, email } = req.body; // Eliminado 'name'
+    const { method } = req.body; // Obtener el método de ingreso
+    const additionalNotes = req.body.additionalNotes;
     const files = req.files;
 
-    // Validar que se haya proporcionado el texto extraído
-    if (!extractedText) {
-      return res.status(400).json({ error: 'No extracted text provided.' });
+    // Validar que se haya proporcionado el método
+    if (!method) {
+      return res.status(400).json({ error: 'Method of submission is required.' });
     }
 
-    // Validar que se haya proporcionado el email
+    // Validar el email en ambos métodos
+    const email = req.body.email;
     if (!email) {
       return res.status(400).json({ error: 'Email is required.' });
     }
@@ -379,51 +386,118 @@ app.post('/upload', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'logo
       return res.status(400).json({ error: 'Invalid email format.' });
     }
 
-    let logoURL = '';
+    if (method === 'card') {
+      // Manejando el envío desde tarjeta
+      const extractedText = req.body.extractedText;
+      if (!extractedText) {
+        return res.status(400).json({ error: 'No extracted text provided.' });
+      }
 
-    // Si se ha subido un logo, procesarlo
-    if (files['logo'] && files['logo'].length > 0) {
-      const logoFile = files['logo'][0];
-      const logoPath = logoFile.path;
-      const logoFileName = `logos/${Date.now()}_${logoFile.originalname}`;
-      const file = bucket.file(logoFileName);
+      let logoURL = '';
 
-      // Subir el logo a Firebase Storage
-      await bucket.upload(logoPath, {
-        destination: logoFileName,
-        metadata: {
-          contentType: logoFile.mimetype,
-        },
-      });
+      // Si se ha subido un logo, procesarlo
+      if (files['logo'] && files['logo'].length > 0) {
+        const logoFile = files['logo'][0];
+        const logoPath = logoFile.path;
+        const logoFileName = `logos/${Date.now()}_${logoFile.originalname}`;
+        const file = bucket.file(logoFileName);
 
-      // Hacer el archivo público (opcional, dependiendo de tu caso de uso)
-      await file.makePublic();
+        // Subir el logo a Firebase Storage
+        await bucket.upload(logoPath, {
+          destination: logoFileName,
+          metadata: {
+            contentType: logoFile.mimetype,
+          },
+        });
 
-      // Obtener la URL pública
-      logoURL = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
-      console.log('Uploaded logo to:', logoURL);
+        // Hacer el archivo público (opcional, dependiendo de tu caso de uso)
+        await file.makePublic();
 
-      // Eliminar el archivo temporal del servidor después de subir
-      fs.unlinkSync(logoPath);
+        // Obtener la URL pública
+        logoURL = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
+        console.log('Uploaded logo to:', logoURL);
+
+        // Eliminar el archivo temporal del servidor después de subir
+        fs.unlinkSync(logoPath);
+      }
+
+      // Crear una nueva entrada de cliente con los datos recibidos
+      const client = {
+        email: email.trim(), // Correo electrónico
+        extractedText: extractedText.trim(), // Texto extraído de la imagen
+        additionalNotes: additionalNotes || '',
+        submissionDate: admin.firestore.FieldValue.serverTimestamp(),
+        logoURL: logoURL, // URL del logo opcional
+      };
+
+      // Guardar el documento en Firestore en la colección 'clients'
+      await db.collection('clients').add(client);
+
+      // Enviar el correo de agradecimiento
+      await sendThankYouEmail(email); // Pasar solo el email
+
+      // Responder con éxito
+      res.json({ message: 'Form submitted successfully.' });
+
+    } else if (method === 'manual') {
+      // Manejando el envío manual
+      const name = req.body.name;
+      const phone = req.body.phone;
+
+      // Validar campos adicionales para el método manual
+      if (!name || !phone) {
+        return res.status(400).json({ error: 'Name and Phone Number are required for manual submissions.' });
+      }
+
+      let logoURL = '';
+
+      // Si se ha subido un logo, procesarlo
+      if (files['manual-logo-upload'] && files['manual-logo-upload'].length > 0) {
+        const logoFile = files['manual-logo-upload'][0];
+        const logoPath = logoFile.path;
+        const logoFileName = `logos/${Date.now()}_${logoFile.originalname}`;
+        const file = bucket.file(logoFileName);
+
+        // Subir el logo a Firebase Storage
+        await bucket.upload(logoPath, {
+          destination: logoFileName,
+          metadata: {
+            contentType: logoFile.mimetype,
+          },
+        });
+
+        // Hacer el archivo público (opcional, dependiendo de tu caso de uso)
+        await file.makePublic();
+
+        // Obtener la URL pública
+        logoURL = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
+        console.log('Uploaded logo to:', logoURL);
+
+        // Eliminar el archivo temporal del servidor después de subir
+        fs.unlinkSync(logoPath);
+      }
+
+      // Crear una nueva entrada de cliente con los datos recibidos
+      const manualClient = {
+        email: email.trim(), // Correo electrónico
+        name: name.trim(), // Nombre
+        phone: phone.trim(), // Número de teléfono
+        additionalNotes: additionalNotes || '',
+        submissionDate: admin.firestore.FieldValue.serverTimestamp(),
+        logoURL: logoURL, // URL del logo opcional
+      };
+
+      // Guardar el documento en Firestore en la colección 'manualClients'
+      await db.collection('manualClients').add(manualClient);
+
+      // Enviar el correo de agradecimiento
+      await sendThankYouEmail(email); // Pasar solo el email
+
+      // Responder con éxito
+      res.json({ message: 'Manual form submitted successfully.' });
+    } else {
+      return res.status(400).json({ error: 'Invalid submission method.' });
     }
-
-    // Crear una nueva entrada de cliente con los datos recibidos
-    const client = {
-      email: email.trim(), // Correo electrónico
-      extractedText: extractedText.trim(), // Texto extraído de la imagen
-      additionalNotes: additionalNotes || '',
-      submissionDate: admin.firestore.FieldValue.serverTimestamp(),
-      logoURL: logoURL, // URL del logo opcional
-    };
-
-    // Guardar el documento en Firestore
-    await db.collection('clients').add(client);
-
-    // Enviar el correo de agradecimiento
-    await sendThankYouEmail(email); // Pasar solo el email
-
-    // Responder con éxito
-    res.json({ message: 'Form submitted successfully.' });
   } catch (error) {
     console.error('Error uploading data:', error);
     res.status(500).json({ error: 'There was an error saving your data.' });
@@ -443,12 +517,21 @@ app.use(
 // Ruta GET para la página administrativa
 app.get('/admin', async (req, res) => {
   try {
-    const snapshot = await db.collection('clients').orderBy('submissionDate', 'desc').get();
+    // Obtener clientes desde tarjetas
+    const snapshotClients = await db.collection('clients').orderBy('submissionDate', 'desc').get();
     const clients = [];
-    snapshot.forEach((doc) => {
+    snapshotClients.forEach((doc) => {
       clients.push({ id: doc.id, ...doc.data() });
     });
-    res.render('admin', { clients });
+
+    // Obtener clientes manuales
+    const snapshotManualClients = await db.collection('manualClients').orderBy('submissionDate', 'desc').get();
+    const manualClients = [];
+    snapshotManualClients.forEach((doc) => {
+      manualClients.push({ id: doc.id, ...doc.data() });
+    });
+
+    res.render('admin', { clients, manualClients });
   } catch (error) {
     console.error('Error fetching clients:', error);
     res.status(500).send('There was an error fetching the data.');

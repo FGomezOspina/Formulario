@@ -27,22 +27,38 @@
             text-align: center;
             margin-bottom: 20px;
         }
+        /* Ocultar secciones por defecto */
+        .manual-section {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <header>
         <div class="nav">
             <img src="/images/logo.jpeg" alt="Company Logo" class="logo">
-            <h1>Business Contact Form(BCF)</h1>
+            <h1>Business Contact Form (BCF)</h1>
             <img src="/images/iftf.png" alt="IFTF Logo" id="iftf" class="logo">
         </div>
     </header>
     <main>
-        <!-- Unified Upload Form (Visible por defecto) -->
+        <!-- Selección de Método de Ingreso de Información -->
+        <div class="method-selection">
+            <label>
+                <input type="radio" name="method" value="card" checked>
+                Agregar desde tarjeta
+            </label>
+            <label>
+                <input type="radio" name="method" value="manual">
+                Agregar manualmente
+            </label>
+        </div>
+
+        <!-- Formulario Unificado -->
         <form id="upload-form" enctype="multipart/form-data">
             <div id="error-message"></div>
 
-            <!-- Campo de Email -->
+            <!-- Campo de Email (Común a ambos métodos) -->
             <section class="company">
                 <h2>Contact Form</h2>
                 <div class="form-group">
@@ -51,57 +67,144 @@
                 </div>
             </section>
 
-            <!-- Image upload section -->
-            <section class="company">
-                <h2>Business Card</h2>
-                <div class="form-group">
-                    <label for="image-upload">Select an image <span style="color: red;">*</span></label>
-                    <input type="file" id="image-upload" name="image" accept="image/*" required>
-                </div>
-                <!-- Image preview (opcional) -->
-                <!--img id="image-preview-upload" src="#" alt="Image Preview" style="display: none;"-->
-            </section>
+            <!-- Sección para Información desde Tarjeta -->
+            <div class="card-section">
+                <!-- Image upload section -->
+                <section class="company">
+                    <h2>Business Card</h2>
+                    <div class="form-group">
+                        <label for="image-upload">Selecciona una imagen <span style="color: red;">*</span></label>
+                        <input type="file" id="image-upload" name="image" accept="image/*" required>
+                    </div>
+                    <!-- Image preview (opcional) -->
+                    <!--img id="image-preview-upload" src="#" alt="Image Preview" style="display: none;"-->
+                </section>
 
-            <!-- Optional Logo Upload Section -->
-            <section class="company">
-                <h2>Upload photo(optional)</h2>
-                <div class="form-group">
-                    <label for="logo-upload">Select photo:</label>
-                    <input type="file" id="logo-upload" name="logo" accept="image/*">
-                </div>
-                <!-- Logo preview -->
-                <img id="logo-preview-upload" src="#" alt="Logo Preview" style="display: none; height: 50px; width: auto;">
-            </section>
+                <!-- Optional Logo Upload Section -->
+                <section class="company">
+                    <h2>Subir foto (opcional)</h2>
+                    <div class="form-group">
+                        <label for="logo-upload">Selecciona una foto:</label>
+                        <input type="file" id="logo-upload" name="logo" accept="image/*">
+                    </div>
+                    <!-- Logo preview -->
+                    <img id="logo-preview-upload" src="#" alt="Logo Preview" style="display: none; height: 50px; width: auto;">
+                </section>
 
-            <!-- Extracted text section -->
-            <section class="company">
-                <h2>Information:</h2>
-                <div class="form-group">
-                    <label for="extractedText-upload"></label>
-                    <textarea id="extractedText-upload" name="extractedText" class="extracted-text" readonly></textarea>
-                </div>
-            </section>
+                <!-- Extracted text section -->
+                <section class="company">
+                    <h2>Información:</h2>
+                    <div class="form-group">
+                        <label for="extractedText-upload"></label>
+                        <textarea id="extractedText-upload" name="extractedText" class="extracted-text" readonly></textarea>
+                    </div>
+                </section>
+            </div>
 
-            <!-- Additional notes section -->
+            <!-- Sección para Información Manual -->
+            <div class="manual-section">
+                <!-- Campo de Nombre -->
+                <section class="company">
+                    <h2>Información del Cliente</h2>
+                    <div class="form-group">
+                        <label for="name">Nombre <span style="color: red;">*</span></label>
+                        <input type="text" id="name" name="name" placeholder="Tu Nombre" required>
+                    </div>
+                </section>
+
+                <!-- Campo de Número de Teléfono -->
+                <section class="company">
+                    <div class="form-group">
+                        <label for="phone">Número de Teléfono <span style="color: red;">*</span></label>
+                        <input type="tel" id="phone" name="phone" placeholder="+1 234 567 890" required>
+                    </div>
+                </section>
+
+                <!-- Opcional: Subir Foto -->
+                <section class="company">
+                    <h2>Subir foto (opcional)</h2>
+                    <div class="form-group">
+                        <label for="manual-logo-upload">Selecciona una foto:</label>
+                        <input type="file" id="manual-logo-upload" name="logo" accept="image/*">
+                    </div>
+                    <!-- Logo preview -->
+                    <img id="manual-logo-preview-upload" src="#" alt="Logo Preview" style="display: none; height: 50px; width: auto;">
+                </section>
+            </div>
+
+            <!-- Additional Notes Section (Común a ambos métodos) -->
             <section class="notes">
-                <h2>Notes:</h2>
+                <h2>Notas:</h2>
                 <div class="form-group">
-                    <label for="additionalNotes-upload">Please, add any additional notes or details (interest in products, business relationship sought, orders placed):</label>
-                    <textarea id="additionalNotes-upload" name="additionalNotes" rows="6" placeholder="Add your notes.."></textarea>
+                    <label for="additionalNotes-upload">Por favor, añade cualquier nota o detalle adicional (interés en productos, relación comercial buscada, pedidos realizados):</label>
+                    <textarea id="additionalNotes-upload" name="additionalNotes" rows="6" placeholder="Añade tus notas.."></textarea>
                 </div>
             </section>
 
             <!-- Botón para Enviar el Formulario -->
-            <button type="submit" id="submit-btn" class="submit-btn" disabled>Submit</button>
+            <button type="submit" id="submit-btn" class="submit-btn" disabled>Enviar</button>
         </form>
     </main>
 
     <footer>
-        <p>&copy; 2024 Majorfd S.A.S. All rights reserved.</p>
+        <p>&copy; 2024 Majorfd S.A.S. Todos los derechos reservados.</p>
     </footer>
 
     <script>
-        // ----------- Manejo de Previsualización de Imagen -----------
+        // ----------- Manejo de Selección de Método -----------
+        document.querySelectorAll('input[name="method"]').forEach(function(elem) {
+            elem.addEventListener('change', function(event) {
+                if (event.target.value === 'card') {
+                    document.querySelector('.card-section').style.display = 'block';
+                    document.querySelector('.manual-section').style.display = 'none';
+                    
+                    // Activar campos de tarjeta
+                    document.getElementById('image-upload').required = true;
+                    
+                    // Desactivar campos manuales
+                    document.getElementById('name').required = false;
+                    document.getElementById('phone').required = false;
+                    
+                    // Limpiar valores de campos manuales
+                    document.getElementById('name').value = '';
+                    document.getElementById('phone').value = '';
+                    
+                    // Desactivar campo de foto manual
+                    document.getElementById('manual-logo-upload').required = false;
+                    document.getElementById('manual-logo-upload').value = '';
+                    document.getElementById('manual-logo-preview-upload').style.display = 'none';
+                    
+                    // Habilitar o deshabilitar botón de envío
+                    document.getElementById('submit-btn').disabled = true;
+                } else if (event.target.value === 'manual') {
+                    document.querySelector('.card-section').style.display = 'none';
+                    document.querySelector('.manual-section').style.display = 'block';
+                    
+                    // Desactivar campos de tarjeta
+                    document.getElementById('image-upload').required = false;
+                    
+                    // Activar campos manuales
+                    document.getElementById('name').required = true;
+                    document.getElementById('phone').required = true;
+                    
+                    // Limpiar valores de campos de tarjeta
+                    document.getElementById('image-upload').value = '';
+                    document.getElementById('extractedText-upload').value = '';
+                    document.getElementById('logo-upload').value = '';
+                    document.getElementById('logo-preview-upload').style.display = 'none';
+                    
+                    // Desactivar requerimiento de foto manual (opcional)
+                    document.getElementById('manual-logo-upload').required = false;
+                    document.getElementById('manual-logo-upload').value = '';
+                    document.getElementById('manual-logo-preview-upload').style.display = 'none';
+                    
+                    // Habilitar el botón de envío directamente
+                    document.getElementById('submit-btn').disabled = false;
+                }
+            });
+        });
+
+        // ----------- Manejo de Previsualización de Imagen (Tarjeta) -----------
         document.getElementById('image-upload').addEventListener('change', function () {
             const fileInput = document.getElementById('image-upload');
             const imagePreview = document.getElementById('image-preview-upload');
@@ -123,10 +226,29 @@
             extractText();
         });
 
-        // ----------- Manejo de Previsualización de Logo -----------
+        // ----------- Manejo de Previsualización de Logo (Tarjeta) -----------
         document.getElementById('logo-upload').addEventListener('change', function () {
             const logoInput = document.getElementById('logo-upload');
             const logoPreview = document.getElementById('logo-preview-upload');
+
+            if (logoInput.files.length === 0) {
+                logoPreview.style.display = 'none';
+                return;
+            }
+
+            // Mostrar previsualización del logo
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                logoPreview.src = e.target.result;
+                logoPreview.style.display = 'block';
+            }
+            reader.readAsDataURL(logoInput.files[0]);
+        });
+
+        // ----------- Manejo de Previsualización de Logo (Manual) -----------
+        document.getElementById('manual-logo-upload').addEventListener('change', function () {
+            const logoInput = document.getElementById('manual-logo-upload');
+            const logoPreview = document.getElementById('manual-logo-preview-upload');
 
             if (logoInput.files.length === 0) {
                 logoPreview.style.display = 'none';
@@ -187,16 +309,20 @@
             const form = event.target;
             const formData = new FormData(form);
             const errorMessage = document.getElementById('error-message');
-            const emailInput = document.getElementById('email');
-            const email = emailInput.value.trim();
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const method = document.querySelector('input[name="method"]:checked').value;
 
             // Validación adicional de Email en el frontend
+            const email = document.getElementById('email').value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
             if (!emailRegex.test(email)) {
                 errorMessage.textContent = 'Por favor, ingresa un correo electrónico válido.';
                 errorMessage.style.display = 'block';
                 return;
             }
+
+            // Añadir el método al FormData
+            formData.append('method', method);
 
             try {
                 // Enviar los datos al servidor para guardar en Firestore y enviar el correo

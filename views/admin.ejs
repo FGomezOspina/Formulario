@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Administración de Clientes</title>
@@ -25,6 +25,7 @@
             background-color: rgba(0,0,0,0.8); /* Fondo semi-transparente */
             align-items: center;
             justify-content: center;
+            display: flex;
         }
 
         .modal-content {
@@ -58,6 +59,41 @@
             text-decoration: none;
             cursor: pointer;
         }
+
+        /* Botones para Alternar Tablas */
+        .toggle-buttons {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .toggle-buttons button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .toggle-buttons button.active {
+            background-color: #45a049;
+        }
+
+        .toggle-buttons button:hover {
+            background-color: #45a049;
+        }
+
+        /* Ocultar ambas tablas por defecto */
+        .data-table {
+            display: none;
+        }
+
+        /* Mostrar la primera tabla por defecto */
+        .data-table.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -67,7 +103,14 @@
         </div>
     </header>
     <main>
-        <div class="table-container">
+        <!-- Botones para Alternar Entre las Tablas -->
+        <div class="toggle-buttons">
+            <button id="showClientsBtn" class="active">Mostrar Clientes desde Tarjeta</button>
+            <button id="showManualClientsBtn">Mostrar Clientes Manuales</button>
+        </div>
+
+        <!-- Tabla para Clientes desde Tarjeta -->
+        <div class="table-container data-table active" id="clientsTableContainer">
             <table id="clientsTable" class="display">
                 <thead>
                     <tr>
@@ -99,16 +142,52 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Tabla para Clientes Manuales -->
+        <div class="table-container data-table" id="manualClientsTableContainer">
+            <table id="manualClientsTable" class="display">
+                <thead>
+                    <tr>
+                        <!-- <th>ID</th> --> <!-- Eliminado el campo ID -->
+                        <th>Email</th>
+                        <th>Nombre</th>
+                        <th>Número de Teléfono</th>
+                        <th>Notas Adicionales</th>
+                        <th>Fecha de Envío</th>
+                        <th>Foto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% manualClients.forEach(client => { %>
+                        <tr>
+                            <!-- <td><%= client.id %></td> --> <!-- Eliminado el campo ID -->
+                            <td><%= client.email %></td> <!-- Mostrar Email -->
+                            <td><%= client.name %></td> <!-- Mostrar Nombre -->
+                            <td><%= client.phone %></td> <!-- Mostrar Número de Teléfono -->
+                            <td><%= client.additionalNotes %></td>
+                            <td><%= client.submissionDate ? client.submissionDate.toDate().toLocaleString() : 'N/A' %></td>
+                            <td>
+                                <% if (client.logoURL) { %>
+                                    <img src="<%= client.logoURL %>" alt="Foto" class="logo-image clickable" style="height: 50px; width: auto; cursor: pointer;">
+                                <% } else { %>
+                                    N/A
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
     </main>
     <footer>
         <p>&copy; 2024 Majorfd S.A.S. Todos los derechos reservados.</p>
     </footer>
 
-    <!-- Modal para Mostrar el Logo Agrandado -->
+    <!-- Modal para Mostrar la Foto Agrandada -->
     <div id="logoModal" class="modal">
         <span class="close-modal">&times;</span>
         <div class="modal-content">
-            <img id="modalImage" src="" alt="Logo Agrandado">
+            <img id="modalImage" src="" alt="Foto Agrandada">
         </div>
     </div>
 
@@ -119,6 +198,7 @@
     <!-- Script de Inicialización de DataTables -->
     <script>
         $(document).ready(function() {
+            // Inicializar DataTable para Clientes desde Tarjeta
             $('#clientsTable').DataTable({
                 "order": [[ 3, "desc" ]], // Ordenar por Fecha de Envío descendente (índice 3)
                 "pageLength": 10,
@@ -131,6 +211,20 @@
                     { "orderable": false, "targets": 4 } // Desactivar ordenamiento en la columna de Logo (índice 4)
                 ]
             });
+
+            // Inicializar DataTable para Clientes Manuales
+            $('#manualClientsTable').DataTable({
+                "order": [[ 4, "desc" ]], // Ordenar por Fecha de Envío descendente (índice 4)
+                "pageLength": 10,
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json" // Cambiar a español
+                },
+                "responsive": true,
+                "autoWidth": false,
+                "columnDefs": [
+                    { "orderable": false, "targets": 5 } // Desactivar ordenamiento en la columna de Foto (índice 5)
+                ]
+            });
         });
 
         // Funcionalidad del Modal
@@ -138,12 +232,14 @@
         const modalImg = document.getElementById("modalImage");
         const closeBtn = document.getElementsByClassName("close-modal")[0];
 
-        // Abrir el modal al hacer clic en una imagen de logo
-        const logos = document.querySelectorAll(".logo-image.clickable");
-        logos.forEach(function(logo) {
-            logo.addEventListener("click", function() {
-                modal.style.display = "flex";
-                modalImg.src = this.src;
+        // Abrir el modal al hacer clic en una imagen de foto
+        document.addEventListener("DOMContentLoaded", function() {
+            const logos = document.querySelectorAll(".logo-image.clickable");
+            logos.forEach(function(logo) {
+                logo.addEventListener("click", function() {
+                    modal.style.display = "flex";
+                    modalImg.src = this.src;
+                });
             });
         });
 
@@ -158,6 +254,21 @@
                 modal.style.display = "none";
             }
         }
+
+        // ----------- Manejo de Botones para Alternar Tablas -----------
+        document.getElementById('showClientsBtn').addEventListener('click', function() {
+            document.getElementById('clientsTableContainer').classList.add('active');
+            document.getElementById('manualClientsTableContainer').classList.remove('active');
+            this.classList.add('active');
+            document.getElementById('showManualClientsBtn').classList.remove('active');
+        });
+
+        document.getElementById('showManualClientsBtn').addEventListener('click', function() {
+            document.getElementById('clientsTableContainer').classList.remove('active');
+            document.getElementById('manualClientsTableContainer').classList.add('active');
+            this.classList.add('active');
+            document.getElementById('showClientsBtn').classList.remove('active');
+        });
     </script>
 </body>
 </html>
