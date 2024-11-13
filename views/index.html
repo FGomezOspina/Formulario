@@ -1,3 +1,4 @@
+<!-- views/index.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -27,6 +28,16 @@
             text-align: center;
             margin-bottom: 20px;
         }
+        /* Estilos para la selección de método */
+        .method-selection {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .method-selection label {
+            margin-right: 20px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -38,58 +49,109 @@
         </div>
     </header>
     <main>
-        <!-- Unified Upload Form (Visible por defecto) -->
+        <!-- Selección de Método de Agregación -->
+        <div class="method-selection">
+            <label>
+                <input type="radio" name="method" value="card" checked> Agregar por Tarjeta
+            </label>
+            <label>
+                <input type="radio" name="method" value="manual"> Agregar Manualmente
+            </label>
+        </div>
+
+        <!-- Formulario Principal -->
         <form id="upload-form" enctype="multipart/form-data">
             <div id="error-message"></div>
 
-            <!-- Campo de Email -->
-            <section class="company">
-                <h2>Contact Form</h2>
-                <div class="form-group">
-                    <label for="email">E-mail <span style="color: red;">*</span></label>
-                    <input type="email" id="email" name="email" placeholder="example@dominio.com" required>
-                </div>
-            </section>
+            <!-- Campos para Agregar por Tarjeta -->
+            <div id="card-fields">
+                <section class="company">
+                    <h2>Contact Form (Agregar por Tarjeta)</h2>
+                    <div class="form-group">
+                        <label for="email-card">E-mail <span style="color: red;">*</span></label>
+                        <input type="email" id="email-card" name="email_card" placeholder="example@dominio.com" required>
+                    </div>
+                </section>
 
-            <!-- Image upload section -->
-            <section class="company">
-                <h2>Business Card</h2>
-                <div class="form-group">
-                    <label for="image-upload">Select an image <span style="color: red;">*</span></label>
-                    <input type="file" id="image-upload" name="image" accept="image/*" required>
-                </div>
-                <!-- Image preview (opcional) -->
-                <!--img id="image-preview-upload" src="#" alt="Image Preview" style="display: none;"-->
-            </section>
+                <!-- Image upload section -->
+                <section class="company">
+                    <h2>Business Card</h2>
+                    <div class="form-group">
+                        <label for="image-upload">Select an image <span style="color: red;">*</span></label>
+                        <input type="file" id="image-upload" name="image" accept="image/*" required>
+                    </div>
+                    <!-- Image preview (opcional) -->
+                    <img id="image-preview-upload" src="#" alt="Image Preview" style="display: none;">
+                </section>
 
-            <!-- Optional Logo Upload Section -->
-            <section class="company">
-                <h2>Upload photo(optional)</h2>
-                <div class="form-group">
-                    <label for="logo-upload">Select photo:</label>
-                    <input type="file" id="logo-upload" name="logo" accept="image/*">
-                </div>
-                <!-- Logo preview -->
-                <img id="logo-preview-upload" src="#" alt="Logo Preview" style="display: none; height: 50px; width: auto;">
-            </section>
+                <!-- Optional Logo Upload Section -->
+                <section class="company">
+                    <h2>Upload photo (optional)</h2>
+                    <div class="form-group">
+                        <label for="logo-upload">Select photo:</label>
+                        <input type="file" id="logo-upload" name="logo" accept="image/*">
+                    </div>
+                    <!-- Logo preview -->
+                    <img id="logo-preview-upload" src="#" alt="Logo Preview" style="display: none; height: 50px; width: auto;">
+                </section>
 
-            <!-- Extracted text section -->
-            <section class="company">
-                <h2>Information:</h2>
-                <div class="form-group">
-                    <label for="extractedText-upload"></label>
-                    <textarea id="extractedText-upload" name="extractedText" class="extracted-text" readonly></textarea>
-                </div>
-            </section>
+                <!-- Extracted text section -->
+                <section class="company">
+                    <h2>Information:</h2>
+                    <div class="form-group">
+                        <label for="extractedText-upload"></label>
+                        <textarea id="extractedText-upload" name="extractedText" class="extracted-text" readonly></textarea>
+                    </div>
+                </section>
 
-            <!-- Additional notes section -->
-            <section class="notes">
-                <h2>Notes:</h2>
-                <div class="form-group">
-                    <label for="additionalNotes-upload">Please, add any additional notes or details (interest in products, business relationship sought, orders placed):</label>
-                    <textarea id="additionalNotes-upload" name="additionalNotes" rows="6" placeholder="Add your notes.."></textarea>
-                </div>
-            </section>
+                <!-- Additional notes section -->
+                <section class="notes">
+                    <h2>Notes:</h2>
+                    <div class="form-group">
+                        <label for="additionalNotes-upload">Please, add any additional notes or details (interest in products, business relationship sought, orders placed):</label>
+                        <textarea id="additionalNotes-upload" name="additionalNotes" rows="6" placeholder="Add your notes.."></textarea>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Campos para Agregar Manualmente -->
+            <div id="manual-fields" style="display: none;">
+                <section class="company">
+                    <h2>Contact Form (Agregar Manualmente)</h2>
+                    <div class="form-group">
+                        <label for="email-manual">E-mail <span style="color: red;">*</span></label>
+                        <input type="email" id="email-manual" name="email_manual" placeholder="example@dominio.com" required disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="name-manual">Name</label>
+                        <input type="text" id="name-manual" name="name" placeholder="Your Name" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone-manual">Phone</label>
+                        <input type="tel" id="phone-manual" name="phone" placeholder="Your Phone Number" disabled>
+                    </div>
+                </section>
+
+                <!-- Optional Logo Upload Section -->
+                <section class="company">
+                    <h2>Upload photo (optional)</h2>
+                    <div class="form-group">
+                        <label for="logo-upload-manual">Select photo:</label>
+                        <input type="file" id="logo-upload-manual" name="logo_manual" accept="image/*" disabled>
+                    </div>
+                    <!-- Logo preview -->
+                    <img id="logo-preview-upload-manual" src="#" alt="Logo Preview" style="display: none; height: 50px; width: auto;">
+                </section>
+
+                <!-- Additional notes section -->
+                <section class="notes">
+                    <h2>Notes:</h2>
+                    <div class="form-group">
+                        <label for="additionalNotes-manual">Please, add any additional notes or details (interest in products, business relationship sought, orders placed):</label>
+                        <textarea id="additionalNotes-manual" name="additionalNotes_manual" rows="6" placeholder="Add your notes.." disabled></textarea>
+                    </div>
+                </section>
+            </div>
 
             <!-- Botón para Enviar el Formulario -->
             <button type="submit" id="submit-btn" class="submit-btn" disabled>Submit</button>
@@ -101,46 +163,164 @@
     </footer>
 
     <script>
+        // ----------- Manejo de Selección de Método -----------
+        const methodRadios = document.getElementsByName('method');
+        const cardFields = document.getElementById('card-fields');
+        const manualFields = document.getElementById('manual-fields');
+        const submitBtn = document.getElementById('submit-btn');
+
+        methodRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                if (radio.value === 'card') {
+                    cardFields.style.display = 'block';
+                    manualFields.style.display = 'none';
+                    
+                    // Habilitar los campos de tarjeta y deshabilitar los manuales
+                    setRequiredAttributes(cardFields, true);
+                    setRequiredAttributesManual(manualFields, false);
+
+                    // Resetear campos manuales
+                    resetFields(manualFields);
+
+                    // Deshabilitar botón de envío hasta que se extraiga texto
+                    submitBtn.disabled = true;
+                } else if (radio.value === 'manual') {
+                    cardFields.style.display = 'none';
+                    manualFields.style.display = 'block';
+
+                    // Habilitar los campos manuales y deshabilitar los de tarjeta
+                    setRequiredAttributes(cardFields, false);
+                    setRequiredAttributesManual(manualFields, true);
+
+                    // Resetear campos de tarjeta
+                    resetFields(cardFields);
+
+                    // Habilitar botón de envío ya que los campos son manuales y requeridos
+                    submitBtn.disabled = false;
+                }
+            });
+        });
+
+        // Función para establecer o eliminar atributos 'required' y 'disabled' en los campos de tarjeta
+        function setRequiredAttributes(container, isRequired) {
+            const inputs = container.querySelectorAll('input, textarea');
+            inputs.forEach(input => {
+                if (isRequired) {
+                    input.setAttribute('required', 'required');
+                    input.removeAttribute('disabled');
+                } else {
+                    input.removeAttribute('required');
+                    input.setAttribute('disabled', 'disabled');
+                }
+            });
+        }
+
+        // Función específica para establecer 'required' y 'disabled' solo en ciertos campos de la sección manual
+        function setRequiredAttributesManual(container, isRequired) {
+            const requiredField = 'email_manual';
+            const inputs = container.querySelectorAll('input, textarea');
+            inputs.forEach(input => {
+                if (input.name === 'email_manual') {
+                    if (isRequired) {
+                        input.setAttribute('required', 'required');
+                        input.removeAttribute('disabled');
+                    } else {
+                        input.removeAttribute('required');
+                        input.setAttribute('disabled', 'disabled');
+                    }
+                } else {
+                    // Campos opcionales: eliminar 'required' y deshabilitar si no están en uso
+                    if (isRequired) {
+                        input.removeAttribute('disabled');
+                    } else {
+                        input.setAttribute('disabled', 'disabled');
+                    }
+                }
+            });
+        }
+
+        // Función para resetear los campos de un contenedor
+        function resetFields(container) {
+            const inputs = container.querySelectorAll('input, textarea');
+            inputs.forEach(input => {
+                if (input.type === 'file') {
+                    input.value = '';
+                    const preview = container.querySelector(`#${input.id.replace('-upload', '-preview')}`);
+                    if (preview) {
+                        preview.style.display = 'none';
+                        preview.src = '#';
+                    }
+                } else {
+                    input.value = '';
+                }
+            });
+        }
+
         // ----------- Manejo de Previsualización de Imagen -----------
-        document.getElementById('image-upload').addEventListener('change', function () {
-            const fileInput = document.getElementById('image-upload');
-            const imagePreview = document.getElementById('image-preview-upload');
+        const imageUpload = document.getElementById('image-upload');
+        const imagePreview = document.getElementById('image-preview-upload');
 
-            if (fileInput.files.length === 0) {
-                imagePreview.style.display = 'none';
-                return;
-            }
+        if (imageUpload && imagePreview) {
+            imageUpload.addEventListener('change', function () {
+                if (imageUpload.files.length === 0) {
+                    imagePreview.style.display = 'none';
+                    return;
+                }
 
-            // Mostrar previsualización de la imagen (opcional)
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                imagePreview.src = e.target.result;
-                imagePreview.style.display = 'block';
-            }
-            reader.readAsDataURL(fileInput.files[0]);
+                // Mostrar previsualización de la imagen
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                }
+                reader.readAsDataURL(imageUpload.files[0]);
 
-            // Iniciar la extracción automática de texto
-            extractText();
-        });
+                // Iniciar la extracción automática de texto
+                extractText();
+            });
+        }
 
-        // ----------- Manejo de Previsualización de Logo -----------
-        document.getElementById('logo-upload').addEventListener('change', function () {
-            const logoInput = document.getElementById('logo-upload');
-            const logoPreview = document.getElementById('logo-preview-upload');
+        // ----------- Manejo de Previsualización de Logo (Agregar por Tarjeta) -----------
+        const logoUpload = document.getElementById('logo-upload');
+        const logoPreview = document.getElementById('logo-preview-upload');
 
-            if (logoInput.files.length === 0) {
-                logoPreview.style.display = 'none';
-                return;
-            }
+        if (logoUpload && logoPreview) {
+            logoUpload.addEventListener('change', function () {
+                if (logoUpload.files.length === 0) {
+                    logoPreview.style.display = 'none';
+                    return;
+                }
 
-            // Mostrar previsualización del logo
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                logoPreview.src = e.target.result;
-                logoPreview.style.display = 'block';
-            }
-            reader.readAsDataURL(logoInput.files[0]);
-        });
+                // Mostrar previsualización del logo
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    logoPreview.src = e.target.result;
+                    logoPreview.style.display = 'block';
+                }
+                reader.readAsDataURL(logoUpload.files[0]);
+            });
+        }
+
+        // ----------- Manejo de Previsualización de Logo (Agregar Manualmente) -----------
+        const logoUploadManual = document.getElementById('logo-upload-manual');
+        const logoPreviewManual = document.getElementById('logo-preview-upload-manual');
+
+        if (logoUploadManual && logoPreviewManual) {
+            logoUploadManual.addEventListener('change', function () {
+                if (logoUploadManual.files.length === 0) {
+                    logoPreviewManual.style.display = 'none';
+                    return;
+                }
+
+                // Mostrar previsualización del logo
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    logoPreviewManual.src = e.target.result;
+                    logoPreviewManual.style.display = 'block';
+                }
+                reader.readAsDataURL(logoUploadManual.files[0]);
+            });
+        }
 
         // ----------- Función para Extraer Texto Automáticamente -----------
         async function extractText() {
@@ -187,23 +367,24 @@
             const form = event.target;
             const formData = new FormData(form);
             const errorMessage = document.getElementById('error-message');
-            const emailInput = document.getElementById('email');
-            const email = emailInput.value.trim();
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-            // Validación adicional de Email en el frontend
-            if (!emailRegex.test(email)) {
-                errorMessage.textContent = 'Por favor, ingresa un correo electrónico válido.';
-                errorMessage.style.display = 'block';
-                return;
-            }
+            const selectedMethod = document.querySelector('input[name="method"]:checked').value;
 
             try {
+                let endpoint = '/upload'; // Por defecto, agregar por tarjeta
+
+                if (selectedMethod === 'manual') {
+                    endpoint = '/uploadManual';
+                }
+
+                console.log(`Enviando formulario a: ${endpoint}`); // Log de depuración
+
                 // Enviar los datos al servidor para guardar en Firestore y enviar el correo
-                const response = await fetch('/upload', {
+                const response = await fetch(endpoint, {
                     method: 'POST',
                     body: formData
                 });
+
+                console.log(`Respuesta del servidor: ${response.status}`); // Log de depuración
 
                 if (!response.ok) {
                     const errorRes = await response.json();
@@ -211,6 +392,7 @@
                 }
 
                 const result = await response.json();
+                console.log('Respuesta exitosa del servidor:', result); // Log de depuración
 
                 // Redirigir a la página de agradecimiento
                 window.location.href = '/thankyou';

@@ -1,3 +1,4 @@
+<!-- views/admin.ejs -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -67,11 +68,12 @@
         </div>
     </header>
     <main>
+        <!-- Tabla para Clientes Agregados por Tarjeta -->
         <div class="table-container">
+            <h2>Clientes Agregados por Tarjeta</h2>
             <table id="clientsTable" class="display">
                 <thead>
                     <tr>
-                        <!-- <th>ID</th> --> <!-- Eliminado el campo ID -->
                         <th>Email</th>
                         <th>Texto Extraído</th>
                         <th>Notas Adicionales</th>
@@ -82,9 +84,43 @@
                 <tbody>
                     <% clients.forEach(client => { %>
                         <tr>
-                            <!-- <td><%= client.id %></td> --> <!-- Eliminado el campo ID -->
                             <td><%= client.email %></td> <!-- Mostrar Email -->
                             <td><%= client.extractedText %></td>
+                            <td><%= client.additionalNotes %></td>
+                            <td><%= client.submissionDate ? client.submissionDate.toDate().toLocaleString() : 'N/A' %></td>
+                            <td>
+                                <% if (client.logoURL) { %>
+                                    <img src="<%= client.logoURL %>" alt="Logo" class="logo-image clickable" style="height: 50px; width: auto; cursor: pointer;">
+                                <% } else { %>
+                                    N/A
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Tabla para Clientes Agregados Manualmente -->
+        <div class="table-container">
+            <h2>Clientes Agregados Manualmente</h2>
+            <table id="manualClientsTable" class="display">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Notas Adicionales</th>
+                        <th>Fecha de Envío</th>
+                        <th>Logo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% manualClients.forEach(client => { %>
+                        <tr>
+                            <td><%= client.email %></td>
+                            <td><%= client.name %></td>
+                            <td><%= client.phone %></td>
                             <td><%= client.additionalNotes %></td>
                             <td><%= client.submissionDate ? client.submissionDate.toDate().toLocaleString() : 'N/A' %></td>
                             <td>
@@ -119,6 +155,7 @@
     <!-- Script de Inicialización de DataTables -->
     <script>
         $(document).ready(function() {
+            // Inicializar DataTables para Clientes por Tarjeta
             $('#clientsTable').DataTable({
                 "order": [[ 3, "desc" ]], // Ordenar por Fecha de Envío descendente (índice 3)
                 "pageLength": 10,
@@ -129,6 +166,20 @@
                 "autoWidth": false,
                 "columnDefs": [
                     { "orderable": false, "targets": 4 } // Desactivar ordenamiento en la columna de Logo (índice 4)
+                ]
+            });
+
+            // Inicializar DataTables para Clientes Manuales
+            $('#manualClientsTable').DataTable({
+                "order": [[ 4, "desc" ]], // Ordenar por Fecha de Envío descendente (índice 4)
+                "pageLength": 10,
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json" // Cambiar a español
+                },
+                "responsive": true,
+                "autoWidth": false,
+                "columnDefs": [
+                    { "orderable": false, "targets": 5 } // Desactivar ordenamiento en la columna de Logo (índice 5)
                 ]
             });
         });
@@ -158,6 +209,13 @@
                 modal.style.display = "none";
             }
         }
+
+        // Cerrar el modal con la tecla Esc
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                modal.style.display = "none";
+            }
+        });
     </script>
 </body>
 </html>

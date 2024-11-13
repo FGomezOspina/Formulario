@@ -64,9 +64,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json({ limit: '10mb' })); // Aumentar el límite si se esperan imágenes grandes
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Establecer EJS como motor de plantillas (si usas EJS)
+// Establecer EJS como motor de plantillas (si usas EJS para el admin)
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+// Middleware para registrar todas las solicitudes entrantes
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
 
 // Definir productos prioritarios por SKU y nombre
 const productosPrioritarios = [
@@ -101,7 +107,6 @@ const excludedProductNames = [
     'Hydrangea Blue Jumbo',
     'Hydrangea Blue Petite',
     'Hydrangea Blue Premium',
-    'Hydrangea Blue Select',
     'Hydrangea Blue Super',
     'Hydrangea Mini Blue',
     'Hydrangea Mini White',
@@ -203,7 +208,7 @@ function ordenarProductos(productos, prioritarios, ordenCategorias) {
     return productosOrdenados;
 }
 
-// Función modificada para generar HTML de los productos sin la columna de precios
+// Función para generar HTML de los productos sin la columna de precios
 function generateProductsHTML(products) {
   if (products.length === 0) {
       return '<p>No products are available at this time.</p>';
@@ -234,9 +239,9 @@ function generateProductsHTML(products) {
 
       html += `
           <tr>
-              <td>${imageUrl ? `<img src="${imageUrl}" alt="${product.name}" class="product-image">` : 'N/A'}</td>
+              <td>${imageUrl ? `<img src="${imageUrl}" alt="${product.name}" class="product-image" style="width:50px;height:auto;">` : 'N/A'}</td>
               <td>${product.name}</td>
-              <td><a href="${productUrl}">View Product</a></td>
+              <td><a href="${productUrl}" target="_blank">View Product</a></td>
           </tr>
       `;
   });
@@ -245,34 +250,36 @@ function generateProductsHTML(products) {
   return html;
 }
 
-async function sendThankYouEmail(toEmail) {
+// Función para enviar correo de agradecimiento
+async function sendThankYouEmail(toEmail, clientData = {}) {
   try {
-      let productos = await fetchEcwidProducts();
-      const storeSettings = await fetchStoreSettings();
-
-      // Filtrar productos para excluir las categorías definidas en excludedCategories
-      productos = productos.filter(product => {
-          if (!product.categories) return true; // Si no tiene categorías, se incluye
-          return !product.categories.some(cat => excludedCategories.includes(cat.name));
-      });
-
-      // Filtrar productos para excluir los nombres especificados en excludedProductNames
-      productos = productos.filter(product => {
-          if (!product.name) return true; // Si no tiene nombre, se incluye
-          return !excludedProductNames.includes(product.name.trim());
-      });
-
-      productos = ordenarProductos(productos, productosPrioritarios, ordenCategorias);
-      const productsHTML = generateProductsHTML(productos);
-      
+      // Plantilla para ambos métodos
       const templatePath = path.join(__dirname, 'views', 'thank-you.html');
       let htmlContent = fs.readFileSync(templatePath, 'utf-8');
-      
-      htmlContent = htmlContent.replace('{{products}}', productsHTML);
-      
-      const logoUrl = 'https://firebasestorage.googleapis.com/v0/b/formulario-531b6.appspot.com/o/logo.jpeg?alt=media&token=202ee807-bd5c-44ac-9b1e-ce443cb11837';
-      htmlContent = htmlContent.replace('{{logo}}', logoUrl);
-      
+
+      // Reemplazar los placeholders con los datos correspondientes
+      htmlContent = htmlContent.replace('{{logo}}', clientData.logoURL || 'https://firebasestorage.googleapis.com/v0/b/formulario-531b6.appspot.com/o/logo.jpeg?alt=media&token=202ee807-bd5c-44ac-9b1e-ce443cb11837');
+
+      // Verificar si es una adición manual y reemplazar los campos adicionales
+      if (clientData.name || clientData.phone || clientData.additionalNotes) {
+          htmlContent = htmlContent.replace('{{name}}', clientData.name || '');
+          htmlContent = htmlContent.replace('{{phone}}', clientData.phone || '');
+          htmlContent = htmlContent.replace('{{additionalNotes}}', clientData.additionalNotes || '');
+      } else {
+          // Eliminar los campos manuales si no existen
+          htmlContent = htmlContent.replace('{{name}}', '');
+          htmlContent = htmlContent.replace('{{phone}}', '');
+          htmlContent = htmlContent.replace('{{additionalNotes}}', '');
+      }
+
+      // Si hay productos para mostrar (agregado por tarjeta)
+      if (clientData.productsHTML) {
+          htmlContent = htmlContent.replace('{{products}}', clientData.productsHTML);
+      } else {
+          // Eliminar la sección de productos si no existen
+          htmlContent = htmlContent.replace('{{products}}', '');
+      }
+
       const msg = {
           to: toEmail,
           from: 'info@fli.com.co',
@@ -288,36 +295,43 @@ async function sendThankYouEmail(toEmail) {
   }
 }
 
-
 // Ruta GET para servir el formulario principal
 app.get('/', (req, res) => {
+  console.log('GET / - Serviendo index.html');
   res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
 // Ruta GET para la página de agradecimiento
 app.get('/thankyou', (req, res) => {
+  console.log('GET /thankyou - Serviendo thankyou.html');
   res.sendFile(path.join(__dirname, 'views', 'thankyou.html')); // Asegúrate de que este archivo existe
 });
 
-// Ruta POST para extraer el texto de la imagen
+// Ruta POST para extraer el texto de la imagen (Agregar por Tarjeta)
 app.post('/extract', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'logo', maxCount: 1 }]), async (req, res) => {
   try {
+    console.log('POST /extract - Iniciando extracción de texto');
+
     const files = req.files;
 
     // Validar que se haya subido una imagen para escaneo de texto
     if (!files['image'] || files['image'].length === 0) {
+      console.warn('POST /extract - No se subió ninguna imagen para extracción de texto');
       return res.status(400).json({ error: 'No image uploaded for text extraction.' });
     }
 
     const imageFile = files['image'][0];
     const imagePath = imageFile.path;
 
+    console.log(`POST /extract - Procesando imagen: ${imagePath}`);
+
     // Usar Tesseract.js para extraer texto de la imagen
     const { data: { text } } = await tesseract.recognize(imagePath, 'eng');
-    console.log('Extracted text:', text);
+    console.log('POST /extract - Texto extraído:', text);
 
     // Eliminar el archivo de imagen temporal después del procesamiento
     fs.unlinkSync(imagePath);
+    console.log(`POST /extract - Archivo temporal eliminado: ${imagePath}`);
 
     let logoURL = '';
 
@@ -328,6 +342,8 @@ app.post('/extract', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'log
       const logoFileName = `logos/${Date.now()}_${logoFile.originalname}`;
       const file = bucket.file(logoFileName);
 
+      console.log(`POST /extract - Subiendo logo: ${logoPath} a ${logoFileName}`);
+
       // Subir el logo a Firebase Storage
       await bucket.upload(logoPath, {
         destination: logoFileName,
@@ -336,46 +352,57 @@ app.post('/extract', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'log
         },
       });
 
+      console.log(`POST /extract - Logo subido a Firebase Storage: ${logoFileName}`);
+
       // Hacer el archivo público (opcional, dependiendo de tu caso de uso)
       await file.makePublic();
+      console.log(`POST /extract - Logo hecho público: ${logoFileName}`);
 
       // Obtener la URL pública
       logoURL = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
-      console.log('Uploaded logo to:', logoURL);
+      console.log(`POST /extract - URL pública del logo: ${logoURL}`);
 
       // Eliminar el archivo temporal del servidor después de subir
       fs.unlinkSync(logoPath);
+      console.log(`POST /extract - Archivo temporal del logo eliminado: ${logoPath}`);
     }
 
     // Limpiar el texto extraído
     const cleanedText = text.replace(/[^a-zA-Z0-9@.,\s-]/g, '').replace(/\s+/g, ' ').trim();
+    console.log('POST /extract - Texto limpio:', cleanedText);
 
     // Devolver el texto extraído y la URL del logo si existe
     res.json({ extractedText: cleanedText, logoURL: logoURL });
+    console.log('POST /extract - Respuesta enviada con éxito');
   } catch (error) {
-    console.error('Error extracting text:', error);
+    console.error('POST /extract - Error durante la extracción de texto:', error);
     res.status(500).json({ error: 'There was an error extracting text from the image.' });
   }
 });
 
-// Ruta POST para guardar los datos en Firestore
+// Ruta POST para guardar los datos en Firestore (Agregar por Tarjeta)
 app.post('/upload', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'logo', maxCount: 1 }]), async (req, res) => {
   try {
-    const { extractedText, additionalNotes, email } = req.body; // Eliminado 'name'
+    console.log('POST /upload - Iniciando proceso de agregación por tarjeta');
+
+    const { extractedText, additionalNotes, email_card } = req.body; // Cambiado a email_card
     const files = req.files;
 
     // Validar que se haya proporcionado el texto extraído
     if (!extractedText) {
+      console.warn('POST /upload - No se proporcionó texto extraído');
       return res.status(400).json({ error: 'No extracted text provided.' });
     }
 
     // Validar que se haya proporcionado el email
-    if (!email) {
+    if (!email_card) {
+      console.warn('POST /upload - No se proporcionó el email');
       return res.status(400).json({ error: 'Email is required.' });
     }
 
     // Validar el formato del email en el servidor
-    if (!validator.isEmail(email)) {
+    if (!validator.isEmail(email_card)) {
+      console.warn('POST /upload - Formato de email inválido:', email_card);
       return res.status(400).json({ error: 'Invalid email format.' });
     }
 
@@ -388,6 +415,8 @@ app.post('/upload', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'logo
       const logoFileName = `logos/${Date.now()}_${logoFile.originalname}`;
       const file = bucket.file(logoFileName);
 
+      console.log(`POST /upload - Subiendo logo: ${logoPath} a ${logoFileName}`);
+
       // Subir el logo a Firebase Storage
       await bucket.upload(logoPath, {
         destination: logoFileName,
@@ -396,37 +425,157 @@ app.post('/upload', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'logo
         },
       });
 
+      console.log(`POST /upload - Logo subido a Firebase Storage: ${logoFileName}`);
+
       // Hacer el archivo público (opcional, dependiendo de tu caso de uso)
       await file.makePublic();
+      console.log(`POST /upload - Logo hecho público: ${logoFileName}`);
 
       // Obtener la URL pública
       logoURL = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
-      console.log('Uploaded logo to:', logoURL);
+      console.log(`POST /upload - URL pública del logo: ${logoURL}`);
 
       // Eliminar el archivo temporal del servidor después de subir
       fs.unlinkSync(logoPath);
+      console.log(`POST /upload - Archivo temporal del logo eliminado: ${logoPath}`);
     }
 
     // Crear una nueva entrada de cliente con los datos recibidos
     const client = {
-      email: email.trim(), // Correo electrónico
+      email: email_card.trim(), // Correo electrónico
       extractedText: extractedText.trim(), // Texto extraído de la imagen
       additionalNotes: additionalNotes || '',
       submissionDate: admin.firestore.FieldValue.serverTimestamp(),
       logoURL: logoURL, // URL del logo opcional
     };
 
-    // Guardar el documento en Firestore
-    await db.collection('clients').add(client);
+    console.log('POST /upload - Datos del cliente a guardar:', client);
 
-    // Enviar el correo de agradecimiento
-    await sendThankYouEmail(email); // Pasar solo el email
+    // Guardar el documento en Firestore en la colección 'clients'
+    const docRef = await db.collection('clients').add(client);
+    console.log(`POST /upload - Cliente agregado con ID: ${docRef.id}`);
+
+    // Enviar el correo de agradecimiento usando la misma plantilla
+    const productos = await fetchEcwidProducts();
+    const storeSettings = await fetchStoreSettings();
+
+    // Filtrar productos para excluir las categorías definidas en excludedCategories
+    let filteredProducts = productos.filter(product => {
+        if (!product.categories) return true; // Si no tiene categorías, se incluye
+        return !product.categories.some(cat => excludedCategories.includes(cat.name));
+    });
+
+    // Filtrar productos para excluir los nombres especificados en excludedProductNames
+    filteredProducts = filteredProducts.filter(product => {
+        if (!product.name) return true; // Si no tiene nombre, se incluye
+        return !excludedProductNames.includes(product.name.trim());
+    });
+
+    filteredProducts = ordenarProductos(filteredProducts, productosPrioritarios, ordenCategorias);
+    const productsHTML = generateProductsHTML(filteredProducts);
+
+    await sendThankYouEmail(email_card, {
+      logoURL: logoURL,
+      productsHTML: productsHTML
+    });
 
     // Responder con éxito
     res.json({ message: 'Form submitted successfully.' });
+    console.log('POST /upload - Respuesta enviada con éxito');
   } catch (error) {
-    console.error('Error uploading data:', error);
+    console.error('POST /upload - Error al guardar los datos:', error);
     res.status(500).json({ error: 'There was an error saving your data.' });
+  }
+});
+
+// Ruta POST para guardar los datos manualmente en Firestore (Agregar Manualmente)
+app.post('/uploadManual', upload.fields([{ name: 'logo_manual', maxCount: 1 }]), async (req, res) => {
+  try {
+    console.log('POST /uploadManual - Iniciando proceso de agregación manual');
+
+    const { email_manual, name, phone, additionalNotes_manual } = req.body;
+    const files = req.files;
+
+    // Log para verificar el contenido de req.body y req.files
+    console.log('POST /uploadManual - req.body:', req.body);
+    console.log('POST /uploadManual - req.files:', req.files);
+
+    // Validar que se haya proporcionado el email
+    if (!email_manual) {
+      console.warn('POST /uploadManual - No se proporcionó el email');
+      return res.status(400).json({ error: 'Email is required.' });
+    }
+
+    // Validar el formato del email
+    if (!validator.isEmail(email_manual)) {
+      console.warn('POST /uploadManual - Formato de email inválido:', email_manual);
+      return res.status(400).json({ error: 'Invalid email format.' });
+    }
+
+    let logoURL = '';
+
+    // Si se ha subido un logo, procesarlo
+    if (files['logo_manual'] && files['logo_manual'].length > 0) {
+      const logoFile = files['logo_manual'][0];
+      const logoPath = logoFile.path;
+      const logoFileName = `manualLogos/${Date.now()}_${logoFile.originalname}`;
+      const file = bucket.file(logoFileName);
+
+      console.log(`POST /uploadManual - Subiendo logo: ${logoPath} a ${logoFileName}`);
+
+      // Subir el logo a Firebase Storage
+      await bucket.upload(logoPath, {
+        destination: logoFileName,
+        metadata: {
+          contentType: logoFile.mimetype,
+        },
+      });
+
+      console.log(`POST /uploadManual - Logo subido a Firebase Storage: ${logoFileName}`);
+
+      // Hacer el archivo público (opcional, dependiendo de tu caso de uso)
+      await file.makePublic();
+      console.log(`POST /uploadManual - Logo hecho público: ${logoFileName}`);
+
+      // Obtener la URL pública
+      logoURL = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
+      console.log(`POST /uploadManual - URL pública del logo: ${logoURL}`);
+
+      // Eliminar el archivo temporal del servidor después de subir
+      fs.unlinkSync(logoPath);
+      console.log(`POST /uploadManual - Archivo temporal del logo eliminado: ${logoPath}`);
+    }
+
+    // Crear una nueva entrada de cliente manual con los datos recibidos
+    const manualClient = {
+      email: email_manual.trim(),
+      name: name ? name.trim() : '',
+      phone: phone ? phone.trim() : '',
+      additionalNotes: additionalNotes_manual || '',
+      submissionDate: admin.firestore.FieldValue.serverTimestamp(),
+      logoURL: logoURL, // URL del logo opcional
+    };
+
+    console.log('POST /uploadManual - Datos del cliente manual a guardar:', manualClient);
+
+    // Guardar el documento en Firestore en la colección 'manualClients'
+    const docRef = await db.collection('manualClients').add(manualClient);
+    console.log(`POST /uploadManual - Cliente manual agregado con ID: ${docRef.id}`);
+
+    // Enviar el correo de agradecimiento usando la misma plantilla
+    await sendThankYouEmail(email_manual, {
+      logoURL: logoURL,
+      name: manualClient.name,
+      phone: manualClient.phone,
+      additionalNotes: manualClient.additionalNotes
+    });
+
+    // Responder con éxito
+    res.json({ message: 'Manual form submitted successfully.' });
+    console.log('POST /uploadManual - Respuesta enviada con éxito');
+  } catch (error) {
+    console.error('POST /uploadManual - Error al guardar los datos manuales:', error);
+    res.status(500).json({ error: 'There was an error saving your manual data.' });
   }
 });
 
@@ -443,29 +592,46 @@ app.use(
 // Ruta GET para la página administrativa
 app.get('/admin', async (req, res) => {
   try {
-    const snapshot = await db.collection('clients').orderBy('submissionDate', 'desc').get();
+    console.log('GET /admin - Acceso al panel administrativo');
+
+    // Obtener clientes agregados por tarjeta
+    const snapshotClients = await db.collection('clients').orderBy('submissionDate', 'desc').get();
     const clients = [];
-    snapshot.forEach((doc) => {
+    snapshotClients.forEach((doc) => {
       clients.push({ id: doc.id, ...doc.data() });
     });
-    res.render('admin', { clients });
+    console.log(`GET /admin - Clientes por tarjeta obtenidos: ${clients.length}`);
+
+    // Obtener clientes agregados manualmente
+    const snapshotManualClients = await db.collection('manualClients').orderBy('submissionDate', 'desc').get();
+    const manualClients = [];
+    snapshotManualClients.forEach((doc) => {
+      manualClients.push({ id: doc.id, ...doc.data() });
+    });
+    console.log(`GET /admin - Clientes manuales obtenidos: ${manualClients.length}`);
+
+    res.render('admin', { clients, manualClients });
+    console.log('GET /admin - Página administrativa renderizada con éxito');
   } catch (error) {
-    console.error('Error fetching clients:', error);
+    console.error('GET /admin - Error al obtener los clientes:', error);
     res.status(500).send('There was an error fetching the data.');
   }
 });
 
 // Middleware de manejo de errores generales
 app.use((err, req, res, next) => {
-  if (err) {
-    console.error('General Error:', err);
+  console.error('General Error Middleware - Error capturado:', err);
+  
+  // Si la solicitud espera JSON, responde con JSON; de lo contrario, con HTML
+  if (req.headers['content-type'] && req.headers['content-type'].includes('application/json')) {
+    return res.status(500).json({ error: 'There was an error processing your request.' });
+  } else {
     return res.status(500).send('There was an error processing your request.');
   }
-  next();
 });
 
 // Iniciar el servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });

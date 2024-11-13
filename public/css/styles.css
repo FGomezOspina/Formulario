@@ -6,18 +6,24 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Roboto', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    background-color: #f9f9f9;
+    color: #333;
 }
 
 header {
-    background-color: #4CAF50; /* Fondo verde */
-    color: white;
-    padding: 15px 0;
+    background-color: #4CAF50;
+    padding: 20px 0;
     text-align: center;
-    position: relative;
+    color: #fff;
+}
+
+.header-container h1 {
+    margin: 0;
+    font-size: 2em;
+    font-weight: 500;
 }
 
 .nav {
@@ -41,17 +47,23 @@ header {
 }
 
 main {
-    padding: 20px;
-    max-width: 800px;
-    margin: 20px auto;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 40px 20px;
 }
 
 form {
     display: flex;
     flex-direction: column;
+}
+
+.method-selection {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.method-selection label {
+    margin-right: 20px;
+    font-weight: bold;
 }
 
 section {
@@ -71,7 +83,6 @@ h2 {
     margin-bottom: 10px;
 }
 
-
 .form-group label {
     margin-bottom: 5px;
     color: #555;
@@ -90,11 +101,10 @@ h2 {
     width: 100%;
 }
 
-
 .notes textarea {
     padding-top: 10px;
     height: 150px; /* Tamaño fijo */
-    width: 750px;
+    width: 100%;
     resize: none;  
 }
 
@@ -127,6 +137,21 @@ button {
 }
 
 button:hover {
+    background-color: #45a049;
+}
+
+button.submit-btn, #capture-btn {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+button.submit-btn:hover, #capture-btn:hover {
     background-color: #45a049;
 }
 
@@ -163,7 +188,7 @@ footer {
     }
 
     main {
-        padding: 15px;
+        padding: 20px 10px;
         margin: 15px;
     }
 
@@ -192,13 +217,23 @@ footer {
     .notes textarea {
         padding-top: 10px;
         height: 150px; /* Tamaño fijo */
-        width: 330px;
+        width: 100%;
         resize: none;  
     }
 
     footer {
         padding: 8px 0;
         font-size: 0.9em;
+    }
+
+    #switch-camera-btn, #capture-btn, button.submit-btn {
+        width: 100%;
+        margin: 10px 0;
+    }
+
+    .logo-image {
+        max-width: 80px;
+        max-height: 80px;
     }
 }
 
@@ -283,6 +318,7 @@ main {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 40px;
 }
 
 /* Estilos para el botón de Switch Camera */
@@ -388,8 +424,6 @@ table.dataTable tbody tr:hover {
     }
 }
 
-/* Modal Styles - Moved to admin.ejs inline styles for better encapsulation */
-
 /* Optional: Scrollbar Styling for Webkit Browsers */
 .table-container::-webkit-scrollbar {
     height: 8px;
@@ -409,14 +443,14 @@ table.dataTable tbody tr:hover {
     background: #555;
 }
 
-@media (max-width: 600px) {
-    #switch-camera-btn, #capture-btn, button.submit-btn {
-        width: 100%;
-        margin: 10px 0;
-    }
+/* Styles for Method Selection */
+.method-selection {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
 
-    .logo-image {
-        max-width: 80px;
-        max-height: 80px;
-    }
+.method-selection label {
+    margin-right: 20px;
+    font-weight: bold;
 }
