@@ -59,6 +59,54 @@
             text-decoration: none;
             cursor: pointer;
         }
+
+        /* Estilos para las tablas */
+        .table-container {
+            margin: 40px auto;
+            width: 90%;
+            overflow-x: auto;
+        }
+
+        table.display {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table.display th,
+        table.display td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        table.display th {
+            background-color: #f2f2f2;
+        }
+
+        table.display tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        table.display tr:hover {
+            background-color: #ddd;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Estilos para las imágenes de logo */
+        .logo-image {
+            height: 50px;
+            width: auto;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .logo-image:hover {
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
@@ -90,7 +138,7 @@
                             <td><%= client.submissionDate ? client.submissionDate.toDate().toLocaleString() : 'N/A' %></td>
                             <td>
                                 <% if (client.logoURL) { %>
-                                    <img src="<%= client.logoURL %>" alt="Logo" class="logo-image clickable" style="height: 50px; width: auto; cursor: pointer;">
+                                    <img src="<%= client.logoURL %>" alt="Logo" class="logo-image clickable">
                                 <% } else { %>
                                     N/A
                                 <% } %>
@@ -125,7 +173,42 @@
                             <td><%= client.submissionDate ? client.submissionDate.toDate().toLocaleString() : 'N/A' %></td>
                             <td>
                                 <% if (client.logoURL) { %>
-                                    <img src="<%= client.logoURL %>" alt="Logo" class="logo-image clickable" style="height: 50px; width: auto; cursor: pointer;">
+                                    <img src="<%= client.logoURL %>" alt="Logo" class="logo-image clickable">
+                                <% } else { %>
+                                    N/A
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Tabla para Clientes Agregados Tarjeta Julian -->
+        <div class="table-container">
+            <h2>Clientes Agregados Tarjeta Julian</h2>
+            <table id="julianClientsTable" class="display">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Notas Adicionales</th>
+                        <th>Fecha de Envío</th>
+                        <th>Logo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% julianClients.forEach(client => { %>
+                        <tr>
+                            <td><%= client.email %></td>
+                            <td><%= client.name %></td>
+                            <td><%= client.phone %></td>
+                            <td><%= client.additionalNotes %></td>
+                            <td><%= client.submissionDate ? client.submissionDate.toDate().toLocaleString() : 'N/A' %></td>
+                            <td>
+                                <% if (client.logoURL) { %>
+                                    <img src="<%= client.logoURL %>" alt="Logo" class="logo-image clickable">
                                 <% } else { %>
                                     N/A
                                 <% } %>
@@ -165,7 +248,7 @@
                 "responsive": true,
                 "autoWidth": false,
                 "columnDefs": [
-                    { "orderable": false, "targets": 4 } // Desactivar ordenamiento en la columna de Logo (índice 4)
+                    { "orderable": false, "targets": -1 } // Desactivar ordenamiento en la última columna (Logo)
                 ]
             });
 
@@ -179,7 +262,21 @@
                 "responsive": true,
                 "autoWidth": false,
                 "columnDefs": [
-                    { "orderable": false, "targets": 5 } // Desactivar ordenamiento en la columna de Logo (índice 5)
+                    { "orderable": false, "targets": -1 } // Desactivar ordenamiento en la última columna (Logo)
+                ]
+            });
+
+            // Inicializar DataTables para Clientes Tarjeta Julian
+            $('#julianClientsTable').DataTable({
+                "order": [[ 4, "desc" ]], // Ordenar por Fecha de Envío descendente (índice 4)
+                "pageLength": 10,
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json" // Cambiar a español
+                },
+                "responsive": true,
+                "autoWidth": false,
+                "columnDefs": [
+                    { "orderable": false, "targets": -1 } // Desactivar ordenamiento en la última columna (Logo)
                 ]
             });
         });
@@ -219,3 +316,4 @@
     </script>
 </body>
 </html>
+

@@ -44,7 +44,7 @@
     <header>
         <div class="nav">
             <img src="/images/logo.jpeg" alt="Company Logo" class="logo">
-            <h1>Business Contact Form(BCF)</h1>
+            <h1>Business Contact Form (BCF)</h1>
             <img src="/images/iftf.png" alt="IFTF Logo" id="iftf" class="logo">
         </div>
     </header>
@@ -56,6 +56,9 @@
             </label>
             <label>
                 <input type="radio" name="method" value="manual"> Agregar Manualmente
+            </label>
+            <label>
+                <input type="radio" name="method" value="julian"> Agregar Tarjeta Julian
             </label>
         </div>
 
@@ -153,6 +156,45 @@
                 </section>
             </div>
 
+            <!-- Campos para Agregar Tarjeta Julian -->
+            <div id="julian-fields" style="display: none;">
+                <section class="company">
+                    <h2>Contact Form (Agregar Tarjeta Julian)</h2>
+                    <div class="form-group">
+                        <label for="email-julian">E-mail <span style="color: red;">*</span></label>
+                        <input type="email" id="email-julian" name="email_julian" placeholder="example@dominio.com" required disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="name-julian">Name</label>
+                        <input type="text" id="name-julian" name="name_julian" placeholder="Your Name" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone-julian">Phone</label>
+                        <input type="tel" id="phone-julian" name="phone_julian" placeholder="Your Phone Number" disabled>
+                    </div>
+                </section>
+
+                <!-- Optional Logo Upload Section -->
+                <section class="company">
+                    <h2>Upload photo (optional)</h2>
+                    <div class="form-group">
+                        <label for="logo-upload-julian">Select photo:</label>
+                        <input type="file" id="logo-upload-julian" name="logo_julian" accept="image/*" disabled>
+                    </div>
+                    <!-- Logo preview -->
+                    <img id="logo-preview-upload-julian" src="#" alt="Logo Preview" style="display: none; height: 50px; width: auto;">
+                </section>
+
+                <!-- Additional notes section -->
+                <section class="notes">
+                    <h2>Notes:</h2>
+                    <div class="form-group">
+                        <label for="additionalNotes-julian">Please, add any additional notes or details (interest in products, business relationship sought, orders placed):</label>
+                        <textarea id="additionalNotes-julian" name="additionalNotes_julian" rows="6" placeholder="Add your notes.." disabled></textarea>
+                    </div>
+                </section>
+            </div>
+
             <!-- Botón para Enviar el Formulario -->
             <button type="submit" id="submit-btn" class="submit-btn" disabled>Submit</button>
         </form>
@@ -167,6 +209,7 @@
         const methodRadios = document.getElementsByName('method');
         const cardFields = document.getElementById('card-fields');
         const manualFields = document.getElementById('manual-fields');
+        const julianFields = document.getElementById('julian-fields');
         const submitBtn = document.getElementById('submit-btn');
 
         methodRadios.forEach(radio => {
@@ -174,28 +217,50 @@
                 if (radio.value === 'card') {
                     cardFields.style.display = 'block';
                     manualFields.style.display = 'none';
+                    julianFields.style.display = 'none';
                     
-                    // Habilitar los campos de tarjeta y deshabilitar los manuales
+                    // Habilitar los campos de tarjeta y deshabilitar los manuales y julian
                     setRequiredAttributes(cardFields, true);
                     setRequiredAttributesManual(manualFields, false);
+                    setRequiredAttributesJulian(julianFields, false);
 
-                    // Resetear campos manuales
+                    // Resetear campos manuales y julian
                     resetFields(manualFields);
+                    resetFields(julianFields);
 
                     // Deshabilitar botón de envío hasta que se extraiga texto
                     submitBtn.disabled = true;
                 } else if (radio.value === 'manual') {
                     cardFields.style.display = 'none';
                     manualFields.style.display = 'block';
+                    julianFields.style.display = 'none';
 
-                    // Habilitar los campos manuales y deshabilitar los de tarjeta
+                    // Habilitar los campos manuales y deshabilitar los de tarjeta y julian
                     setRequiredAttributes(cardFields, false);
                     setRequiredAttributesManual(manualFields, true);
+                    setRequiredAttributesJulian(julianFields, false);
 
-                    // Resetear campos de tarjeta
+                    // Resetear campos de tarjeta y julian
                     resetFields(cardFields);
+                    resetFields(julianFields);
 
                     // Habilitar botón de envío ya que los campos son manuales y requeridos
+                    submitBtn.disabled = false;
+                } else if (radio.value === 'julian') {
+                    cardFields.style.display = 'none';
+                    manualFields.style.display = 'none';
+                    julianFields.style.display = 'block';
+
+                    // Habilitar los campos julian y deshabilitar los de tarjeta y manual
+                    setRequiredAttributes(cardFields, false);
+                    setRequiredAttributesManual(manualFields, false);
+                    setRequiredAttributesJulian(julianFields, true);
+
+                    // Resetear campos de tarjeta y manual
+                    resetFields(cardFields);
+                    resetFields(manualFields);
+
+                    // Habilitar botón de envío ya que 'julian' no requiere extracción de texto
                     submitBtn.disabled = false;
                 }
             });
@@ -217,7 +282,6 @@
 
         // Función específica para establecer 'required' y 'disabled' solo en ciertos campos de la sección manual
         function setRequiredAttributesManual(container, isRequired) {
-            const requiredField = 'email_manual';
             const inputs = container.querySelectorAll('input, textarea');
             inputs.forEach(input => {
                 if (input.name === 'email_manual') {
@@ -233,6 +297,31 @@
                     if (isRequired) {
                         input.removeAttribute('disabled');
                     } else {
+                        input.removeAttribute('required');
+                        input.setAttribute('disabled', 'disabled');
+                    }
+                }
+            });
+        }
+
+        // Función específica para establecer 'required' y 'disabled' solo en ciertos campos de la sección julian
+        function setRequiredAttributesJulian(container, isRequired) {
+            const inputs = container.querySelectorAll('input, textarea');
+            inputs.forEach(input => {
+                if (input.name === 'email_julian') {
+                    if (isRequired) {
+                        input.setAttribute('required', 'required');
+                        input.removeAttribute('disabled');
+                    } else {
+                        input.removeAttribute('required');
+                        input.setAttribute('disabled', 'disabled');
+                    }
+                } else {
+                    // Campos opcionales: eliminar 'required' y deshabilitar si no están en uso
+                    if (isRequired) {
+                        input.removeAttribute('disabled');
+                    } else {
+                        input.removeAttribute('required');
                         input.setAttribute('disabled', 'disabled');
                     }
                 }
@@ -322,6 +411,27 @@
             });
         }
 
+        // ----------- Manejo de Previsualización de Logo (Agregar Julian) -----------
+        const logoUploadJulian = document.getElementById('logo-upload-julian');
+        const logoPreviewJulian = document.getElementById('logo-preview-upload-julian');
+
+        if (logoUploadJulian && logoPreviewJulian) {
+            logoUploadJulian.addEventListener('change', function () {
+                if (logoUploadJulian.files.length === 0) {
+                    logoPreviewJulian.style.display = 'none';
+                    return;
+                }
+
+                // Mostrar previsualización del logo
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    logoPreviewJulian.src = e.target.result;
+                    logoPreviewJulian.style.display = 'block';
+                }
+                reader.readAsDataURL(logoUploadJulian.files[0]);
+            });
+        }
+
         // ----------- Función para Extraer Texto Automáticamente -----------
         async function extractText() {
             const form = document.getElementById('upload-form');
@@ -374,6 +484,8 @@
 
                 if (selectedMethod === 'manual') {
                     endpoint = '/uploadManual';
+                } else if (selectedMethod === 'julian') {
+                    endpoint = '/uploadJulian';
                 }
 
                 console.log(`Enviando formulario a: ${endpoint}`); // Log de depuración

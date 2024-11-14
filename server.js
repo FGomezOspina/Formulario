@@ -260,7 +260,7 @@ async function sendThankYouEmail(toEmail, clientData = {}) {
       // Reemplazar los placeholders con los datos correspondientes
       htmlContent = htmlContent.replace('{{logo}}', clientData.logoURL || 'https://firebasestorage.googleapis.com/v0/b/formulario-531b6.appspot.com/o/logo.jpeg?alt=media&token=202ee807-bd5c-44ac-9b1e-ce443cb11837');
 
-      // Verificar si es una adición manual y reemplazar los campos adicionales
+      // Verificar si es una adición manual o julian y reemplazar los campos adicionales
       if (clientData.name || clientData.phone || clientData.additionalNotes) {
           htmlContent = htmlContent.replace('{{name}}', clientData.name || '');
           htmlContent = htmlContent.replace('{{phone}}', clientData.phone || '');
@@ -496,7 +496,7 @@ app.post('/uploadManual', upload.fields([{ name: 'logo_manual', maxCount: 1 }]),
     const { email_manual, name, phone, additionalNotes_manual } = req.body;
     const files = req.files;
 
-    // Log para verificar el contenido de req.body y req.files
+    // Log para verificar el contenido de req.body
     console.log('POST /uploadManual - req.body:', req.body);
     console.log('POST /uploadManual - req.files:', req.files);
 
@@ -579,6 +579,97 @@ app.post('/uploadManual', upload.fields([{ name: 'logo_manual', maxCount: 1 }]),
   }
 });
 
+// Ruta POST para guardar los datos en Firestore (Agregar Tarjeta Julian)
+app.post('/uploadJulian', upload.fields([{ name: 'logo_julian', maxCount: 1 }]), async (req, res) => {
+  try {
+    console.log('POST /uploadJulian - Iniciando proceso de agregación Tarjeta Julian');
+
+    const { email_julian, name_julian, phone_julian, additionalNotes_julian } = req.body;
+    const files = req.files;
+
+    // Log para verificar el contenido de req.body y req.files
+    console.log('POST /uploadJulian - req.body:', req.body);
+    console.log('POST /uploadJulian - req.files:', req.files);
+
+    // Validar que se haya proporcionado el email
+    if (!email_julian) {
+      console.warn('POST /uploadJulian - No se proporcionó el email');
+      return res.status(400).json({ error: 'Email is required.' });
+    }
+
+    // Validar el formato del email
+    if (!validator.isEmail(email_julian)) {
+      console.warn('POST /uploadJulian - Formato de email inválido:', email_julian);
+      return res.status(400).json({ error: 'Invalid email format.' });
+    }
+
+    let logoURL = '';
+
+    // Si se ha subido un logo, procesarlo
+    if (files['logo_julian'] && files['logo_julian'].length > 0) {
+      const logoFile = files['logo_julian'][0];
+      const logoPath = logoFile.path;
+      const logoFileName = `julianLogos/${Date.now()}_${logoFile.originalname}`;
+      const file = bucket.file(logoFileName);
+
+      console.log(`POST /uploadJulian - Subiendo logo: ${logoPath} a ${logoFileName}`);
+
+      // Subir el logo a Firebase Storage
+      await bucket.upload(logoPath, {
+        destination: logoFileName,
+        metadata: {
+          contentType: logoFile.mimetype,
+        },
+      });
+
+      console.log(`POST /uploadJulian - Logo subido a Firebase Storage: ${logoFileName}`);
+
+      // Hacer el archivo público (opcional, dependiendo de tu caso de uso)
+      await file.makePublic();
+      console.log(`POST /uploadJulian - Logo hecho público: ${logoFileName}`);
+
+      // Obtener la URL pública
+      logoURL = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
+      console.log(`POST /uploadJulian - URL pública del logo: ${logoURL}`);
+
+      // Eliminar el archivo temporal del servidor después de subir
+      fs.unlinkSync(logoPath);
+      console.log(`POST /uploadJulian - Archivo temporal del logo eliminado: ${logoPath}`);
+    }
+
+    // Crear una nueva entrada de cliente julian con los datos recibidos
+    const julianClient = {
+      email: email_julian.trim(),
+      name: name_julian ? name_julian.trim() : '',
+      phone: phone_julian ? phone_julian.trim() : '',
+      additionalNotes: additionalNotes_julian || '',
+      submissionDate: admin.firestore.FieldValue.serverTimestamp(),
+      logoURL: logoURL, // URL del logo opcional
+    };
+
+    console.log('POST /uploadJulian - Datos del cliente julian a guardar:', julianClient);
+
+    // Guardar el documento en Firestore en la colección 'julianClients'
+    const docRef = await db.collection('julianClients').add(julianClient);
+    console.log(`POST /uploadJulian - Cliente julian agregado con ID: ${docRef.id}`);
+
+    // Enviar el correo de agradecimiento usando la misma plantilla
+    await sendThankYouEmail(email_julian, {
+      logoURL: logoURL,
+      name: julianClient.name,
+      phone: julianClient.phone,
+      additionalNotes: julianClient.additionalNotes
+    });
+
+    // Responder con éxito
+    res.json({ message: 'Julian form submitted successfully.' });
+    console.log('POST /uploadJulian - Respuesta enviada con éxito');
+  } catch (error) {
+    console.error('POST /uploadJulian - Error al guardar los datos julian:', error);
+    res.status(500).json({ error: 'There was an error saving your Julian data.' });
+  }
+});
+
 // Ruta GET para el panel administrativo (protegido con autenticación básica)
 app.use(
   '/admin',
@@ -610,7 +701,15 @@ app.get('/admin', async (req, res) => {
     });
     console.log(`GET /admin - Clientes manuales obtenidos: ${manualClients.length}`);
 
-    res.render('admin', { clients, manualClients });
+    // Obtener clientes agregados Julian
+    const snapshotJulianClients = await db.collection('julianClients').orderBy('submissionDate', 'desc').get();
+    const julianClients = [];
+    snapshotJulianClients.forEach((doc) => {
+      julianClients.push({ id: doc.id, ...doc.data() });
+    });
+    console.log(`GET /admin - Clientes Julian obtenidos: ${julianClients.length}`);
+
+    res.render('admin', { clients, manualClients, julianClients });
     console.log('GET /admin - Página administrativa renderizada con éxito');
   } catch (error) {
     console.error('GET /admin - Error al obtener los clientes:', error);
