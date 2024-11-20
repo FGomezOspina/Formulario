@@ -1,0 +1,97 @@
+<!-- views/edit.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Entrada</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        form {
+            max-width: 600px;
+            margin: auto;
+        }
+
+        div {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50; /* Verde */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        img {
+            margin-top: 10px;
+            max-width: 100px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Editar Entrada</h1>
+    <form action="/admin/edit" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="id" value="<%= data.id %>">
+        <input type="hidden" name="collection" value="<%= collection %>">
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" name="email" value="<%= data.email %>" required>
+        </div>
+        <% if (collection === 'clients') { %>
+            <div>
+                <label for="extractedText">Texto Extraído:</label>
+                <textarea name="extractedText" rows="4"><%= data.extractedText %></textarea>
+            </div>
+        <% } else { %>
+            <div>
+                <label for="name">Nombre:</label>
+                <input type="text" name="name" value="<%= data.name %>">
+            </div>
+            <div>
+                <label for="phone">Teléfono:</label>
+                <input type="text" name="phone" value="<%= data.phone %>">
+            </div>
+        <% } %>
+        <div>
+            <label for="additionalNotes">Notas Adicionales:</label>
+            <textarea name="additionalNotes" rows="4"><%= data.additionalNotes %></textarea>
+        </div>
+        <div>
+            <label for="logo">Logo:</label>
+            <% if (data.logoURL) { %>
+                <img src="<%= data.logoURL %>" alt="Logo">
+            <% } else { %>
+                N/A
+            <% } %>
+            <br>
+            <input type="file" name="logo">
+        </div>
+        <div>
+            <label for="priority">Prioridad:</label>
+            <input type="number" name="priority" value="<%= data.priority || 0 %>">
+        </div>
+        <button type="submit">Guardar Cambios</button>
+    </form>
+</body>
+</html>

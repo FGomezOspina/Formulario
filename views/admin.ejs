@@ -107,6 +107,27 @@
         .logo-image:hover {
             transform: scale(1.1);
         }
+
+        /* Estilos para los botones de acción */
+        .action-button {
+            margin: 0 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .edit-button {
+            background-color: #4CAF50; /* Verde */
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .delete-button {
+            background-color: #f44336; /* Rojo */
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -127,12 +148,14 @@
                         <th>Notas Adicionales</th>
                         <th>Fecha de Envío</th>
                         <th>Logo</th>
+                        <th>Prioridad</th> <!-- Nueva columna -->
+                        <th>Acciones</th> <!-- Nueva columna -->
                     </tr>
                 </thead>
                 <tbody>
                     <% clients.forEach(client => { %>
                         <tr>
-                            <td><%= client.email %></td> <!-- Mostrar Email -->
+                            <td><%= client.email %></td>
                             <td><%= client.extractedText %></td>
                             <td><%= client.additionalNotes %></td>
                             <td><%= client.submissionDate ? client.submissionDate.toDate().toLocaleString() : 'N/A' %></td>
@@ -142,6 +165,11 @@
                                 <% } else { %>
                                     N/A
                                 <% } %>
+                            </td>
+                            <td><%= client.priority || 0 %></td> <!-- Mostrar prioridad -->
+                            <td>
+                                <button class="action-button edit-button" data-id="<%= client.id %>" data-collection="clients">Editar</button>
+                                <button class="action-button delete-button" data-id="<%= client.id %>" data-collection="clients">Eliminar</button>
                             </td>
                         </tr>
                     <% }) %>
@@ -161,6 +189,8 @@
                         <th>Notas Adicionales</th>
                         <th>Fecha de Envío</th>
                         <th>Logo</th>
+                        <th>Prioridad</th> <!-- Nueva columna -->
+                        <th>Acciones</th> <!-- Nueva columna -->
                     </tr>
                 </thead>
                 <tbody>
@@ -177,6 +207,11 @@
                                 <% } else { %>
                                     N/A
                                 <% } %>
+                            </td>
+                            <td><%= client.priority || 0 %></td> <!-- Mostrar prioridad -->
+                            <td>
+                                <button class="action-button edit-button" data-id="<%= client.id %>" data-collection="manualClients">Editar</button>
+                                <button class="action-button delete-button" data-id="<%= client.id %>" data-collection="manualClients">Eliminar</button>
                             </td>
                         </tr>
                     <% }) %>
@@ -196,6 +231,8 @@
                         <th>Notas Adicionales</th>
                         <th>Fecha de Envío</th>
                         <th>Logo</th>
+                        <th>Prioridad</th> <!-- Nueva columna -->
+                        <th>Acciones</th> <!-- Nueva columna -->
                     </tr>
                 </thead>
                 <tbody>
@@ -212,6 +249,11 @@
                                 <% } else { %>
                                     N/A
                                 <% } %>
+                            </td>
+                            <td><%= client.priority || 0 %></td> <!-- Mostrar prioridad -->
+                            <td>
+                                <button class="action-button edit-button" data-id="<%= client.id %>" data-collection="julianClients">Editar</button>
+                                <button class="action-button delete-button" data-id="<%= client.id %>" data-collection="julianClients">Eliminar</button>
                             </td>
                         </tr>
                     <% }) %>
@@ -240,7 +282,7 @@
         $(document).ready(function() {
             // Inicializar DataTables para Clientes por Tarjeta
             $('#clientsTable').DataTable({
-                "order": [[ 3, "desc" ]], // Ordenar por Fecha de Envío descendente (índice 3)
+                "order": [[5, "desc"], [3, "desc"]], // Ordenar por Prioridad y Fecha de Envío
                 "pageLength": 10,
                 "language": {
                     "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json" // Cambiar a español
@@ -248,13 +290,13 @@
                 "responsive": true,
                 "autoWidth": false,
                 "columnDefs": [
-                    { "orderable": false, "targets": -1 } // Desactivar ordenamiento en la última columna (Logo)
+                    { "orderable": false, "targets": -1 } // Desactivar ordenamiento en la última columna (Acciones)
                 ]
             });
 
             // Inicializar DataTables para Clientes Manuales
             $('#manualClientsTable').DataTable({
-                "order": [[ 4, "desc" ]], // Ordenar por Fecha de Envío descendente (índice 4)
+                "order": [[6, "desc"], [4, "desc"]], // Ordenar por Prioridad y Fecha de Envío
                 "pageLength": 10,
                 "language": {
                     "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json" // Cambiar a español
@@ -262,13 +304,13 @@
                 "responsive": true,
                 "autoWidth": false,
                 "columnDefs": [
-                    { "orderable": false, "targets": -1 } // Desactivar ordenamiento en la última columna (Logo)
+                    { "orderable": false, "targets": -1 } // Desactivar ordenamiento en la última columna (Acciones)
                 ]
             });
 
             // Inicializar DataTables para Clientes Tarjeta Julian
             $('#julianClientsTable').DataTable({
-                "order": [[ 4, "desc" ]], // Ordenar por Fecha de Envío descendente (índice 4)
+                "order": [[6, "desc"], [4, "desc"]], // Ordenar por Prioridad y Fecha de Envío
                 "pageLength": 10,
                 "language": {
                     "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json" // Cambiar a español
@@ -276,7 +318,7 @@
                 "responsive": true,
                 "autoWidth": false,
                 "columnDefs": [
-                    { "orderable": false, "targets": -1 } // Desactivar ordenamiento en la última columna (Logo)
+                    { "orderable": false, "targets": -1 } // Desactivar ordenamiento en la última columna (Acciones)
                 ]
             });
         });
@@ -313,7 +355,33 @@
                 modal.style.display = "none";
             }
         });
+
+        // Manejar el clic en el botón de eliminar
+        $(document).on('click', '.delete-button', function() {
+            const docId = $(this).data('id');
+            const collection = $(this).data('collection');
+            if (confirm('¿Estás seguro de que deseas eliminar esta entrada?')) {
+                $.ajax({
+                    url: '/admin/delete',
+                    type: 'POST',
+                    data: { id: docId, collection: collection },
+                    success: function(response) {
+                        alert('Entrada eliminada con éxito.');
+                        location.reload();
+                    },
+                    error: function(err) {
+                        alert('Error al eliminar la entrada.');
+                    }
+                });
+            }
+        });
+
+        // Manejar el clic en el botón de editar
+        $(document).on('click', '.edit-button', function() {
+            const docId = $(this).data('id');
+            const collection = $(this).data('collection');
+            window.location.href = `/admin/edit?id=${docId}&collection=${collection}`;
+        });
     </script>
 </body>
 </html>
-

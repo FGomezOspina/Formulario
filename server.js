@@ -64,7 +64,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json({ limit: '10mb' })); // Aumentar el límite si se esperan imágenes grandes
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Establecer EJS como motor de plantillas (si usas EJS para el admin)
+// Establecer EJS como motor de plantillas
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -133,12 +133,12 @@ async function fetchEcwidProducts() {
                 'Authorization': `Bearer ${apiToken}`
             },
             params: {
-                limit: 100, // Puedes ajustar el límite según tus necesidades
+                limit: 100,
                 offset: 0
             }
         });
-        console.log('Respuesta de la API de Ecwid:', JSON.stringify(response.data, null, 2)); // Depuración
-        return response.data.items; // Ajusta según la respuesta de la API
+        console.log('Respuesta de la API de Ecwid:', JSON.stringify(response.data, null, 2));
+        return response.data.items;
     } catch (error) {
         console.error('Error al obtener productos de Ecwid:', error.response ? error.response.data : error.message);
         return [];
@@ -155,7 +155,7 @@ async function fetchStoreSettings() {
                 'Authorization': `Bearer ${apiToken}`
             }
         });
-        console.log('Store Settings:', JSON.stringify(response.data, null, 2)); // Depuración
+        console.log('Store Settings:', JSON.stringify(response.data, null, 2));
         return response.data;
     } catch (error) {
         console.error('Error al obtener la configuración del store:', error.response ? error.response.data : error.message);
@@ -182,7 +182,7 @@ function ordenarProductos(productos, prioritarios, ordenCategorias) {
 
         if (index !== -1) {
             productosOrdenados.push(productosRestantes[index]);
-            productosRestantes.splice(index, 1); // Eliminar del arreglo restante
+            productosRestantes.splice(index, 1);
         } else {
             console.warn(`Producto prioritario no encontrado: ${prioritario.sku || prioritario.name}`);
         }
@@ -202,7 +202,7 @@ function ordenarProductos(productos, prioritarios, ordenCategorias) {
     });
 
     // 3. Añadir cualquier otro producto que no esté en las categorías especificadas
-    productosRestantes.sort((a, b) => a.name.localeCompare(b.name)); // Ordenar alfabéticamente
+    productosRestantes.sort((a, b) => a.name.localeCompare(b.name));
     productosOrdenados.push(...productosRestantes);
 
     return productosOrdenados;
@@ -253,7 +253,6 @@ function generateProductsHTML(products) {
 // Función para enviar correo de agradecimiento
 async function sendThankYouEmail(toEmail, clientData = {}) {
   try {
-      // Plantilla para ambos métodos
       const templatePath = path.join(__dirname, 'views', 'thank-you.html');
       let htmlContent = fs.readFileSync(templatePath, 'utf-8');
 
@@ -354,7 +353,7 @@ app.post('/extract', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'log
 
       console.log(`POST /extract - Logo subido a Firebase Storage: ${logoFileName}`);
 
-      // Hacer el archivo público (opcional, dependiendo de tu caso de uso)
+      // Hacer el archivo público
       await file.makePublic();
       console.log(`POST /extract - Logo hecho público: ${logoFileName}`);
 
@@ -385,7 +384,7 @@ app.post('/upload', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'logo
   try {
     console.log('POST /upload - Iniciando proceso de agregación por tarjeta');
 
-    const { extractedText, additionalNotes, email_card } = req.body; // Cambiado a email_card
+    const { extractedText, additionalNotes, email_card } = req.body;
     const files = req.files;
 
     // Validar que se haya proporcionado el texto extraído
@@ -427,7 +426,7 @@ app.post('/upload', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'logo
 
       console.log(`POST /upload - Logo subido a Firebase Storage: ${logoFileName}`);
 
-      // Hacer el archivo público (opcional, dependiendo de tu caso de uso)
+      // Hacer el archivo público
       await file.makePublic();
       console.log(`POST /upload - Logo hecho público: ${logoFileName}`);
 
@@ -442,11 +441,12 @@ app.post('/upload', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'logo
 
     // Crear una nueva entrada de cliente con los datos recibidos
     const client = {
-      email: email_card.trim(), // Correo electrónico
-      extractedText: extractedText.trim(), // Texto extraído de la imagen
+      email: email_card.trim(),
+      extractedText: extractedText.trim(),
       additionalNotes: additionalNotes || '',
       submissionDate: admin.firestore.FieldValue.serverTimestamp(),
-      logoURL: logoURL, // URL del logo opcional
+      logoURL: logoURL,
+      priority: 0 // prioridad por defecto
     };
 
     console.log('POST /upload - Datos del cliente a guardar:', client);
@@ -461,13 +461,13 @@ app.post('/upload', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'logo
 
     // Filtrar productos para excluir las categorías definidas en excludedCategories
     let filteredProducts = productos.filter(product => {
-        if (!product.categories) return true; // Si no tiene categorías, se incluye
+        if (!product.categories) return true;
         return !product.categories.some(cat => excludedCategories.includes(cat.name));
     });
 
     // Filtrar productos para excluir los nombres especificados en excludedProductNames
     filteredProducts = filteredProducts.filter(product => {
-        if (!product.name) return true; // Si no tiene nombre, se incluye
+        if (!product.name) return true;
         return !excludedProductNames.includes(product.name.trim());
     });
 
@@ -533,7 +533,7 @@ app.post('/uploadManual', upload.fields([{ name: 'logo_manual', maxCount: 1 }]),
 
       console.log(`POST /uploadManual - Logo subido a Firebase Storage: ${logoFileName}`);
 
-      // Hacer el archivo público (opcional, dependiendo de tu caso de uso)
+      // Hacer el archivo público
       await file.makePublic();
       console.log(`POST /uploadManual - Logo hecho público: ${logoFileName}`);
 
@@ -553,7 +553,8 @@ app.post('/uploadManual', upload.fields([{ name: 'logo_manual', maxCount: 1 }]),
       phone: phone ? phone.trim() : '',
       additionalNotes: additionalNotes_manual || '',
       submissionDate: admin.firestore.FieldValue.serverTimestamp(),
-      logoURL: logoURL, // URL del logo opcional
+      logoURL: logoURL,
+      priority: 0 // prioridad por defecto
     };
 
     console.log('POST /uploadManual - Datos del cliente manual a guardar:', manualClient);
@@ -624,7 +625,7 @@ app.post('/uploadJulian', upload.fields([{ name: 'logo_julian', maxCount: 1 }]),
 
       console.log(`POST /uploadJulian - Logo subido a Firebase Storage: ${logoFileName}`);
 
-      // Hacer el archivo público (opcional, dependiendo de tu caso de uso)
+      // Hacer el archivo público
       await file.makePublic();
       console.log(`POST /uploadJulian - Logo hecho público: ${logoFileName}`);
 
@@ -644,7 +645,8 @@ app.post('/uploadJulian', upload.fields([{ name: 'logo_julian', maxCount: 1 }]),
       phone: phone_julian ? phone_julian.trim() : '',
       additionalNotes: additionalNotes_julian || '',
       submissionDate: admin.firestore.FieldValue.serverTimestamp(),
-      logoURL: logoURL, // URL del logo opcional
+      logoURL: logoURL,
+      priority: 0 // prioridad por defecto
     };
 
     console.log('POST /uploadJulian - Datos del cliente julian a guardar:', julianClient);
@@ -674,7 +676,7 @@ app.post('/uploadJulian', upload.fields([{ name: 'logo_julian', maxCount: 1 }]),
 app.use(
   '/admin',
   basicAuth({
-    users: { admin: process.env.ADMIN_PASS || '1234' }, // Cambia esto para producción
+    users: { admin: process.env.ADMIN_PASS || '1234' },
     challenge: true,
     realm: 'Firestore Administration',
   })
@@ -683,31 +685,34 @@ app.use(
 // Ruta GET para la página administrativa
 app.get('/admin', async (req, res) => {
   try {
-    console.log('GET /admin - Acceso al panel administrativo');
+    console.log('GET /admin - Accediendo al panel administrativo');
 
-    // Obtener clientes agregados por tarjeta
-    const snapshotClients = await db.collection('clients').orderBy('submissionDate', 'desc').get();
+    // Obtener clientes agregados por tarjeta ordenados por prioridad y fecha
+    const snapshotClients = await db.collection('clients').orderBy('priority', 'desc').orderBy('submissionDate', 'desc').get();
     const clients = [];
     snapshotClients.forEach((doc) => {
       clients.push({ id: doc.id, ...doc.data() });
     });
     console.log(`GET /admin - Clientes por tarjeta obtenidos: ${clients.length}`);
+    console.log('Datos de clientes por tarjeta:', clients);
 
-    // Obtener clientes agregados manualmente
-    const snapshotManualClients = await db.collection('manualClients').orderBy('submissionDate', 'desc').get();
+    // Obtener clientes agregados manualmente ordenados por prioridad y fecha
+    const snapshotManualClients = await db.collection('manualClients').orderBy('priority', 'desc').orderBy('submissionDate', 'desc').get();
     const manualClients = [];
     snapshotManualClients.forEach((doc) => {
       manualClients.push({ id: doc.id, ...doc.data() });
     });
     console.log(`GET /admin - Clientes manuales obtenidos: ${manualClients.length}`);
+    console.log('Datos de clientes manuales:', manualClients);
 
-    // Obtener clientes agregados Julian
-    const snapshotJulianClients = await db.collection('julianClients').orderBy('submissionDate', 'desc').get();
+    // Obtener clientes agregados Julian ordenados por prioridad y fecha
+    const snapshotJulianClients = await db.collection('julianClients').orderBy('priority', 'desc').orderBy('submissionDate', 'desc').get();
     const julianClients = [];
     snapshotJulianClients.forEach((doc) => {
       julianClients.push({ id: doc.id, ...doc.data() });
     });
     console.log(`GET /admin - Clientes Julian obtenidos: ${julianClients.length}`);
+    console.log('Datos de clientes Julian:', julianClients);
 
     res.render('admin', { clients, manualClients, julianClients });
     console.log('GET /admin - Página administrativa renderizada con éxito');
@@ -717,11 +722,111 @@ app.get('/admin', async (req, res) => {
   }
 });
 
+// Ruta POST para eliminar documentos
+app.post('/admin/delete', async (req, res) => {
+    try {
+        const { id, collection } = req.body;
+        if (!id || !collection) {
+            return res.status(400).json({ error: 'ID y colección son requeridos.' });
+        }
+        await db.collection(collection).doc(id).delete();
+        console.log(`Documento con ID ${id} eliminado de la colección ${collection}.`);
+        res.json({ message: 'Documento eliminado con éxito.' });
+    } catch (error) {
+        console.error('Error al eliminar el documento:', error);
+        res.status(500).json({ error: 'Error al eliminar el documento.' });
+    }
+});
+
+// Ruta GET para mostrar el formulario de edición
+app.get('/admin/edit', async (req, res) => {
+    try {
+        const { id, collection } = req.query;
+        if (!id || !collection) {
+            return res.status(400).send('ID y colección son requeridos.');
+        }
+        const docRef = db.collection(collection).doc(id);
+        const doc = await docRef.get();
+        if (!doc.exists) {
+            return res.status(404).send('Documento no encontrado.');
+        }
+        const data = { id: doc.id, ...doc.data() };
+        res.render('edit', { data, collection });
+    } catch (error) {
+        console.error('Error al obtener el documento para editar:', error);
+        res.status(500).send('Error al obtener el documento para editar.');
+    }
+});
+
+// Ruta POST para actualizar el documento
+app.post('/admin/edit', upload.single('logo'), async (req, res) => {
+    try {
+        const { id, collection, email, name, phone, extractedText, additionalNotes, priority } = req.body;
+        const file = req.file;
+
+        if (!id || !collection || !email) {
+            return res.status(400).send('ID, colección y email son requeridos.');
+        }
+
+        const docRef = db.collection(collection).doc(id);
+
+        // Preparar los datos para actualizar
+        const updateData = {
+            email: email.trim(),
+            additionalNotes: additionalNotes || '',
+            priority: priority ? parseInt(priority) : 0
+        };
+
+        if (collection === 'clients') {
+            updateData.extractedText = extractedText || '';
+        } else {
+            updateData.name = name || '';
+            updateData.phone = phone || '';
+        }
+
+        // Si se ha subido un nuevo logo
+        if (file) {
+            const logoPath = file.path;
+            const logoFileName = `${collection}Logos/${Date.now()}_${file.originalname}`;
+            const firebaseFile = bucket.file(logoFileName);
+
+            // Subir el nuevo logo a Firebase Storage
+            await bucket.upload(logoPath, {
+                destination: logoFileName,
+                metadata: {
+                    contentType: file.mimetype,
+                },
+            });
+
+            // Hacer el archivo público
+            await firebaseFile.makePublic();
+
+            // Obtener la URL pública
+            const logoURL = `https://storage.googleapis.com/${bucket.name}/${firebaseFile.name}`;
+
+            // Eliminar el archivo temporal
+            fs.unlinkSync(logoPath);
+
+            // Actualizar el logoURL en los datos
+            updateData.logoURL = logoURL;
+        }
+
+        // Actualizar el documento en Firestore
+        await docRef.update(updateData);
+
+        console.log(`Documento con ID ${id} actualizado en la colección ${collection}.`);
+
+        res.redirect('/admin');
+    } catch (error) {
+        console.error('Error al actualizar el documento:', error);
+        res.status(500).send('Error al actualizar el documento.');
+    }
+});
+
 // Middleware de manejo de errores generales
 app.use((err, req, res, next) => {
   console.error('General Error Middleware - Error capturado:', err);
   
-  // Si la solicitud espera JSON, responde con JSON; de lo contrario, con HTML
   if (req.headers['content-type'] && req.headers['content-type'].includes('application/json')) {
     return res.status(500).json({ error: 'There was an error processing your request.' });
   } else {
