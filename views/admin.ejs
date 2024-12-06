@@ -1,6 +1,6 @@
 <!-- views/admin.ejs -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Administración de Clientes</title>
@@ -128,6 +128,40 @@
             border: none;
             border-radius: 4px;
         }
+
+        /* Estilos para la barra de navegación de pestañas */
+        .tab-nav {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            border-bottom: 2px solid #4CAF50;
+        }
+
+        .tab-nav button {
+            background-color: transparent;
+            border: none;
+            outline: none;
+            padding: 14px 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 16px;
+            color: #555;
+        }
+
+        .tab-nav button.active {
+            border-bottom: 4px solid #4CAF50;
+            color: #333;
+            font-weight: bold;
+        }
+
+        /* Estilos para las secciones de contenido de las pestañas */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -137,133 +171,159 @@
         </div>
     </header>
     <main>
-        <!-- Tabla para Clientes Agregados por Tarjeta -->
-        <div class="table-container">
-            <h2>Clientes Agregados por Tarjeta</h2>
-            <table id="clientsTable" class="display">
-                <thead>
-                    <tr>
-                        <th>Email</th>
-                        <th>Texto Extraído</th>
-                        <th>Notas Adicionales</th>
-                        <th>Fecha de Envío</th>
-                        <th>Logo</th>
-                        <th>Prioridad</th> <!-- Nueva columna -->
-                        <th>Acciones</th> <!-- Nueva columna -->
-                    </tr>
-                </thead>
-                <tbody>
-                    <% clients.forEach(client => { %>
-                        <tr>
-                            <td><%= client.email %></td>
-                            <td><%= client.extractedText %></td>
-                            <td><%= client.additionalNotes %></td>
-                            <td><%= client.submissionDate ? client.submissionDate.toDate().toLocaleString() : 'N/A' %></td>
-                            <td>
-                                <% if (client.logoURL) { %>
-                                    <img src="<%= client.logoURL %>" alt="Logo" class="logo-image clickable">
-                                <% } else { %>
-                                    N/A
-                                <% } %>
-                            </td>
-                            <td><%= client.priority || 0 %></td> <!-- Mostrar prioridad -->
-                            <td>
-                                <button class="action-button edit-button" data-id="<%= client.id %>" data-collection="clients">Editar</button>
-                                <button class="action-button delete-button" data-id="<%= client.id %>" data-collection="clients">Eliminar</button>
-                            </td>
-                        </tr>
-                    <% }) %>
-                </tbody>
-            </table>
+        <!-- Barra de Navegación de Pestañas -->
+        <div class="tab-nav">
+            <button class="tab-link active" data-tab="iftf">Clientes IFTF</button>
+            <button class="tab-link" data-tab="mayoristas">Clientes Mayoristas</button>
+            <button class="tab-link" data-tab="masivo">Clientes Masivo</button>
         </div>
 
-        <!-- Tabla para Clientes Agregados Manualmente -->
-        <div class="table-container">
-            <h2>Clientes Agregados Manualmente</h2>
-            <table id="manualClientsTable" class="display">
-                <thead>
-                    <tr>
-                        <th>Email</th>
-                        <th>Name</th>
-                        <th>Phone</th>
-                        <th>Notas Adicionales</th>
-                        <th>Fecha de Envío</th>
-                        <th>Logo</th>
-                        <th>Prioridad</th> <!-- Nueva columna -->
-                        <th>Acciones</th> <!-- Nueva columna -->
-                    </tr>
-                </thead>
-                <tbody>
-                    <% manualClients.forEach(client => { %>
+        <!-- Contenido de las Pestañas -->
+
+        <!-- Clientes IFTF -->
+        <div id="iftf" class="tab-content active">
+            <div class="table-container">
+                <h2>Clientes IFTF</h2>
+                <table id="clientsTable" class="display">
+                    <thead>
                         <tr>
-                            <td><%= client.email %></td>
-                            <td><%= client.name %></td>
-                            <td><%= client.phone %></td>
-                            <td><%= client.additionalNotes %></td>
-                            <td><%= client.submissionDate ? client.submissionDate.toDate().toLocaleString() : 'N/A' %></td>
-                            <td>
-                                <% if (client.logoURL) { %>
-                                    <img src="<%= client.logoURL %>" alt="Logo" class="logo-image clickable">
-                                <% } else { %>
-                                    N/A
-                                <% } %>
-                            </td>
-                            <td><%= client.priority || 0 %></td> <!-- Mostrar prioridad -->
-                            <td>
-                                <button class="action-button edit-button" data-id="<%= client.id %>" data-collection="manualClients">Editar</button>
-                                <button class="action-button delete-button" data-id="<%= client.id %>" data-collection="manualClients">Eliminar</button>
-                            </td>
+                            <th>Email</th>
+                            <th>Texto Extraído</th>
+                            <th>Notas Adicionales</th>
+                            <th>Fecha de Envío</th>
+                            <th>Logo</th>
+                            <th>Prioridad</th> <!-- Nueva columna -->
+                            <th>Acciones</th> <!-- Nueva columna -->
                         </tr>
-                    <% }) %>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <% clients.forEach(client => { %>
+                            <tr>
+                                <td><%= client.email %></td>
+                                <td><%= client.extractedText %></td>
+                                <td><%= client.additionalNotes %></td>
+                                <td><%= client.submissionDate ? client.submissionDate.toDate().toLocaleString() : 'N/A' %></td>
+                                <td>
+                                    <% if (client.logoURL) { %>
+                                        <img src="<%= client.logoURL %>" alt="Logo" class="logo-image clickable">
+                                    <% } else { %>
+                                        N/A
+                                    <% } %>
+                                </td>
+                                <td><%= client.priority || 0 %></td> <!-- Mostrar prioridad -->
+                                <td>
+                                    <button class="action-button edit-button" data-id="<%= client.id %>" data-collection="clients">Editar</button>
+                                    <button class="action-button delete-button" data-id="<%= client.id %>" data-collection="clients">Eliminar</button>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Tarjetas Julian -->
+            <div class="table-container">
+                <h2>Tarjetas Julian</h2>
+                <table id="julianClientsTable" class="display">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Notas Adicionales</th>
+                            <th>Fecha de Envío</th>
+                            <th>Logo</th>
+                            <th>Prioridad</th> <!-- Nueva columna -->
+                            <th>Acciones</th> <!-- Nueva columna -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% julianClients.forEach(client => { %>
+                            <tr>
+                                <td><%= client.email %></td>
+                                <td><%= client.name %></td>
+                                <td><%= client.phone %></td>
+                                <td><%= client.additionalNotes %></td>
+                                <td><%= client.submissionDate ? client.submissionDate.toDate().toLocaleString() : 'N/A' %></td>
+                                <td>
+                                    <% if (client.logoURL) { %>
+                                        <img src="<%= client.logoURL %>" alt="Logo" class="logo-image clickable">
+                                    <% } else { %>
+                                        N/A
+                                    <% } %>
+                                </td>
+                                <td><%= client.priority || 0 %></td> <!-- Mostrar prioridad -->
+                                <td>
+                                    <button class="action-button edit-button" data-id="<%= client.id %>" data-collection="julianClients">Editar</button>
+                                    <button class="action-button delete-button" data-id="<%= client.id %>" data-collection="julianClients">Eliminar</button>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Tarjetas Agregadas Manualmente -->
+            <div class="table-container">
+                <h2>Tarjetas Agregadas Manualmente</h2>
+                <table id="manualClientsTable" class="display">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Notas Adicionales</th>
+                            <th>Fecha de Envío</th>
+                            <th>Logo</th>
+                            <th>Prioridad</th> <!-- Nueva columna -->
+                            <th>Acciones</th> <!-- Nueva columna -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% manualClients.forEach(client => { %>
+                            <tr>
+                                <td><%= client.email %></td>
+                                <td><%= client.name %></td>
+                                <td><%= client.phone %></td>
+                                <td><%= client.additionalNotes %></td>
+                                <td><%= client.submissionDate ? client.submissionDate.toDate().toLocaleString() : 'N/A' %></td>
+                                <td>
+                                    <% if (client.logoURL) { %>
+                                        <img src="<%= client.logoURL %>" alt="Logo" class="logo-image clickable">
+                                    <% } else { %>
+                                        N/A
+                                    <% } %>
+                                </td>
+                                <td><%= client.priority || 0 %></td> <!-- Mostrar prioridad -->
+                                <td>
+                                    <button class="action-button edit-button" data-id="<%= client.id %>" data-collection="manualClients">Editar</button>
+                                    <button class="action-button delete-button" data-id="<%= client.id %>" data-collection="manualClients">Eliminar</button>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <!-- Tabla para Clientes Agregados Tarjeta Julian -->
-        <div class="table-container">
-            <h2>Clientes Agregados Tarjeta Julian</h2>
-            <table id="julianClientsTable" class="display">
-                <thead>
-                    <tr>
-                        <th>Email</th>
-                        <th>Name</th>
-                        <th>Phone</th>
-                        <th>Notas Adicionales</th>
-                        <th>Fecha de Envío</th>
-                        <th>Logo</th>
-                        <th>Prioridad</th> <!-- Nueva columna -->
-                        <th>Acciones</th> <!-- Nueva columna -->
-                    </tr>
-                </thead>
-                <tbody>
-                    <% julianClients.forEach(client => { %>
-                        <tr>
-                            <td><%= client.email %></td>
-                            <td><%= client.name %></td>
-                            <td><%= client.phone %></td>
-                            <td><%= client.additionalNotes %></td>
-                            <td><%= client.submissionDate ? client.submissionDate.toDate().toLocaleString() : 'N/A' %></td>
-                            <td>
-                                <% if (client.logoURL) { %>
-                                    <img src="<%= client.logoURL %>" alt="Logo" class="logo-image clickable">
-                                <% } else { %>
-                                    N/A
-                                <% } %>
-                            </td>
-                            <td><%= client.priority || 0 %></td> <!-- Mostrar prioridad -->
-                            <td>
-                                <button class="action-button edit-button" data-id="<%= client.id %>" data-collection="julianClients">Editar</button>
-                                <button class="action-button delete-button" data-id="<%= client.id %>" data-collection="julianClients">Eliminar</button>
-                            </td>
-                        </tr>
-                    <% }) %>
-                </tbody>
-            </table>
+        <!-- Clientes Mayoristas -->
+        <div id="mayoristas" class="tab-content">
+            <div class="table-container">
+                <h2>Clientes Mayoristas</h2>
+                <!-- Aquí puedes agregar la tabla para Clientes Mayoristas en el futuro -->
+                <p>Aún no hay datos para Clientes Mayoristas.</p>
+            </div>
+        </div>
+
+        <!-- Clientes Masivo -->
+        <div id="masivo" class="tab-content">
+            <div class="table-container">
+                <h2>Clientes Masivo</h2>
+                <!-- Aquí puedes agregar la tabla para Clientes Masivo en el futuro -->
+                <p>Aún no hay datos para Clientes Masivo.</p>
+            </div>
         </div>
     </main>
-    <footer>
-        <p>&copy; 2024 Majorfd S.A.S. Todos los derechos reservados.</p>
-    </footer>
 
     <!-- Modal para Mostrar el Logo Agrandado -->
     <div id="logoModal" class="modal">
@@ -280,7 +340,7 @@
     <!-- Script de Inicialización de DataTables -->
     <script>
         $(document).ready(function() {
-            // Inicializar DataTables para Clientes por Tarjeta
+            // Inicializar DataTables para Clientes por Tarjeta IFTF
             $('#clientsTable').DataTable({
                 "order": [[5, "desc"], [3, "desc"]], // Ordenar por Prioridad y Fecha de Envío
                 "pageLength": 10,
@@ -294,8 +354,36 @@
                 ]
             });
 
-            // Inicializar DataTables para Clientes Manuales
+            // Inicializar DataTables para Tarjetas Julian
+            $('#julianClientsTable').DataTable({
+                "order": [[5, "desc"], [3, "desc"]], // Ajustado el índice de prioridad
+                "pageLength": 10,
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json" // Cambiar a español
+                },
+                "responsive": true,
+                "autoWidth": false,
+                "columnDefs": [
+                    { "orderable": false, "targets": -1 } // Desactivar ordenamiento en la última columna (Acciones)
+                ]
+            });
+
+            // Inicializar DataTables para Tarjetas Agregadas Manualmente
             $('#manualClientsTable').DataTable({
+                "order": [[5, "desc"], [3, "desc"]], // Ajustado el índice de prioridad
+                "pageLength": 10,
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json" // Cambiar a español
+                },
+                "responsive": true,
+                "autoWidth": false,
+                "columnDefs": [
+                    { "orderable": false, "targets": -1 } // Desactivar ordenamiento en la última columna (Acciones)
+                ]
+            });
+
+            // Inicializar DataTables para Clientes Mayoristas (futuro)
+            $('#wholesaleClientsTable').DataTable({
                 "order": [[6, "desc"], [4, "desc"]], // Ordenar por Prioridad y Fecha de Envío
                 "pageLength": 10,
                 "language": {
@@ -308,8 +396,8 @@
                 ]
             });
 
-            // Inicializar DataTables para Clientes Tarjeta Julian
-            $('#julianClientsTable').DataTable({
+            // Inicializar DataTables para Clientes Masivo (futuro)
+            $('#massiveClientsTable').DataTable({
                 "order": [[6, "desc"], [4, "desc"]], // Ordenar por Prioridad y Fecha de Envío
                 "pageLength": 10,
                 "language": {
@@ -320,6 +408,17 @@
                 "columnDefs": [
                     { "orderable": false, "targets": -1 } // Desactivar ordenamiento en la última columna (Acciones)
                 ]
+            });
+
+            // Funcionalidad de las Pestañas
+            $('.tab-link').click(function() {
+                var tab_id = $(this).attr('data-tab');
+
+                $('.tab-link').removeClass('active');
+                $('.tab-content').removeClass('active');
+
+                $(this).addClass('active');
+                $("#" + tab_id).addClass('active');
             });
         });
 
@@ -385,3 +484,4 @@
     </script>
 </body>
 </html>
+

@@ -1,5 +1,9 @@
 /* public/css/styles.css */
 
+/* ===========================
+   Reset y Estilos Básicos
+   =========================== */
+
 /* Reset básico para márgenes y paddings */
 * {
     box-sizing: border-box;
@@ -12,6 +16,10 @@ body {
     background-color: #f9f9f9;
     color: #333;
 }
+
+/* ===========================
+   Header y Navegación
+   =========================== */
 
 header {
     background-color: #4CAF50;
@@ -46,9 +54,17 @@ header {
     width: auto;
 }
 
+/* ===========================
+   Contenido Principal
+   =========================== */
+
 main {
     padding: 40px 20px;
 }
+
+/* ===========================
+   Formularios
+   =========================== */
 
 form {
     display: flex;
@@ -125,6 +141,10 @@ input[type="checkbox"] {
     margin-right: 5px;
 }
 
+/* ===========================
+   Botones
+   =========================== */
+
 button {
     padding: 12px;
     background-color: #4CAF50;
@@ -155,6 +175,10 @@ button.submit-btn:hover, #capture-btn:hover {
     background-color: #45a049;
 }
 
+/* ===========================
+   Footer
+   =========================== */
+
 footer {
     background-color: #4CAF50; /* Fondo verde */
     color: white;
@@ -165,7 +189,178 @@ footer {
     margin-top: 40px;
 }
 
-/* Media Queries para Responsividad */
+/* ===========================
+   Tablas
+   =========================== */
+
+/* Estilos para las tablas dentro de .table-container */
+.table-container {
+    overflow-x: auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 40px;
+}
+
+table.display {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table.display th,
+table.display td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+table.display th {
+    background-color: #f2f2f2;
+}
+
+table.display tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+table.display tr:hover {
+    background-color: #ddd;
+}
+
+.logo-image {
+    max-width: 100px;
+    max-height: 100px;
+    border-radius: 8px;
+    object-fit: contain;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.logo-image:hover {
+    transform: scale(1.05);
+}
+
+/* ===========================
+   DataTables
+   =========================== */
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    background-color: #4CAF50 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 4px !important;
+    padding: 5px 10px !important;
+    margin: 2px !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background-color: #45a049 !important;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px;
+}
+
+.dataTables_wrapper .dataTables_length select {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px;
+}
+
+/* ===========================
+   Navegación por Pestañas (Tabs)
+   =========================== */
+
+/* Barra de Navegación de Pestañas */
+.tab-nav {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+    border-bottom: 2px solid #4CAF50;
+}
+
+.tab-nav button {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    padding: 14px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 16px;
+    color: #555;
+}
+
+.tab-nav button.active {
+    border-bottom: 4px solid #4CAF50;
+    color: #333;
+    font-weight: bold;
+}
+
+/* Contenido de las Pestañas */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* ===========================
+   Modal para Mostrar Logos
+   =========================== */
+
+/* Modal */
+.modal {
+    display: none; /* Oculto por defecto */
+    position: fixed; /* Fijo en la pantalla */
+    z-index: 1000; /* Asegurar que esté encima de otros elementos */
+    left: 0;
+    top: 0;
+    width: 100%; /* Ancho completo */
+    height: 100%; /* Altura completa */
+    overflow: auto; /* Habilitar scroll si es necesario */
+    background-color: rgba(0,0,0,0.8); /* Fondo semi-transparente */
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    position: relative;
+    margin: auto;
+    padding: 0;
+    width: 80%;
+    max-width: 700px;
+}
+
+.modal-content img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+/* Botón de Cerrar Modal */
+.close-modal {
+    position: absolute;
+    top: 10px;
+    right: 25px;
+    color: #fff;
+    font-size: 35px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-modal:hover,
+.close-modal:focus {
+    color: #bbb;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* ===========================
+   Media Queries para Responsividad
+   =========================== */
 
 /* Pantallas pequeñas (móviles) */
 @media (max-width: 600px) {
@@ -284,145 +479,9 @@ footer {
     }
 }
 
-/* General Styles */
-body {
-    font-family: 'Roboto', sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f9f9f9;
-    color: #333;
-}
-
-header {
-    background-color: #4CAF50;
-    padding: 20px 0;
-    text-align: center;
-    color: #fff;
-}
-
-.header-container h1 {
-    margin: 0;
-    font-size: 2em;
-    font-weight: 500;
-}
-
-main {
-    padding: 40px 20px;
-}
-
-
-/* Table Styles */
-.table-container {
-    overflow-x: auto;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 40px;
-}
-
-/* Estilos para el botón de Switch Camera */
-#switch-camera-btn {
-    padding: 10px 20px;
-    background-color: #555;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    border-radius: 5px;
-    margin-left: 10px;
-    transition: background-color 0.3s;
-}
-
-#switch-camera-btn:hover {
-    background-color: #333;
-}
-
-/* Ajustes para mantener consistencia con otros botones */
-button.submit-btn, #capture-btn {
-    padding: 10px 20px;
-    background-color: #4CAF50;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-}
-
-button.submit-btn:hover, #capture-btn:hover {
-    background-color: #45a049;
-}
-
-
-table.dataTable thead th {
-    background-color: #f2f2f2;
-    color: #333;
-    border-bottom: 2px solid #ddd;
-}
-
-table.dataTable tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-table.dataTable tbody tr:hover {
-    background-color: #f1f1f1;
-}
-
-.logo-image {
-    max-width: 100px;
-    max-height: 100px;
-    border-radius: 8px;
-    object-fit: contain;
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.logo-image:hover {
-    transform: scale(1.05);
-}
-
-/* DataTables Pagination and Search */
-.dataTables_wrapper .dataTables_paginate .paginate_button {
-    background-color: #4CAF50 !important;
-    color: white !important;
-    border: none !important;
-    border-radius: 4px !important;
-    padding: 5px 10px !important;
-    margin: 2px !important;
-}
-
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-    background-color: #45a049 !important;
-}
-
-.dataTables_wrapper .dataTables_filter input {
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 5px;
-}
-
-.dataTables_wrapper .dataTables_length select {
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 5px;
-}
-
-/* Responsive Adjustments */
-@media (max-width: 600px) {
-    .header-container h1 {
-        font-size: 1.5em;
-    }
-
-    main {
-        padding: 20px 10px;
-    }
-
-    .logo-image {
-        max-width: 80px;
-        max-height: 80px;
-    }
-}
+/* ===========================
+   Scrollbar Personalizada para Webkit
+   =========================== */
 
 /* Optional: Scrollbar Styling for Webkit Browsers */
 .table-container::-webkit-scrollbar {
@@ -441,16 +500,4 @@ table.dataTable tbody tr:hover {
 
 .table-container::-webkit-scrollbar-thumb:hover {
     background: #555;
-}
-
-/* Styles for Method Selection */
-.method-selection {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
-}
-
-.method-selection label {
-    margin-right: 20px;
-    font-weight: bold;
 }
