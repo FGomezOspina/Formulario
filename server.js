@@ -672,7 +672,91 @@ app.post('/uploadJulian', upload.fields([{ name: 'logo_julian', maxCount: 1 }]),
   }
 });
 
-// Ruta GET para el panel administrativo (protegido con autenticación básica)
+// Ruta POST para agregar Cliente Mayorista
+app.post('/admin/addWholesale', async (req, res) => {
+    try {
+        const { name, contact, company, website, email, country, observations } = req.body;
+
+        // Validar que se haya proporcionado el email
+        if (!email) {
+            return res.status(400).json({ error: 'Email is required.' });
+        }
+
+        // Validar el formato del email
+        if (!validator.isEmail(email)) {
+            return res.status(400).json({ error: 'Invalid email format.' });
+        }
+
+        // Crear una nueva entrada de cliente mayorista con los datos recibidos
+        const wholesaleClient = {
+            name: name.trim(),
+            contact: contact.trim(),
+            company: company.trim(),
+            website: website.trim(),
+            email: email.trim(),
+            country: country.trim(),
+            observations: observations.trim(),
+            submissionDate: admin.firestore.FieldValue.serverTimestamp(),
+            priority: 0 // prioridad por defecto
+        };
+
+        console.log('POST /admin/addWholesale - Datos del cliente mayorista a guardar:', wholesaleClient);
+
+        // Guardar el documento en Firestore en la colección 'wholesaleClients'
+        const docRef = await db.collection('wholesaleClients').add(wholesaleClient);
+        console.log(`POST /admin/addWholesale - Cliente mayorista agregado con ID: ${docRef.id}`);
+
+        // Responder con éxito
+        res.json({ message: 'Cliente Mayorista agregado con éxito.' });
+    } catch (error) {
+        console.error('POST /admin/addWholesale - Error al agregar Cliente Mayorista:', error);
+        res.status(500).json({ error: 'There was an error adding the Wholesale Client.' });
+    }
+});
+
+// Ruta POST para agregar Cliente Masivo
+app.post('/admin/addMassive', async (req, res) => {
+    try {
+        const { name, contact, company, website, email, country, observations } = req.body;
+
+        // Validar que se haya proporcionado el email
+        if (!email) {
+            return res.status(400).json({ error: 'Email is required.' });
+        }
+
+        // Validar el formato del email
+        if (!validator.isEmail(email)) {
+            return res.status(400).json({ error: 'Invalid email format.' });
+        }
+
+        // Crear una nueva entrada de cliente masivo con los datos recibidos
+        const massiveClient = {
+            name: name.trim(),
+            contact: contact.trim(),
+            company: company.trim(),
+            website: website.trim(),
+            email: email.trim(),
+            country: country.trim(),
+            observations: observations.trim(),
+            submissionDate: admin.firestore.FieldValue.serverTimestamp(),
+            priority: 0 // prioridad por defecto
+        };
+
+        console.log('POST /admin/addMassive - Datos del cliente masivo a guardar:', massiveClient);
+
+        // Guardar el documento en Firestore en la colección 'massiveClients'
+        const docRef = await db.collection('massiveClients').add(massiveClient);
+        console.log(`POST /admin/addMassive - Cliente masivo agregado con ID: ${docRef.id}`);
+
+        // Responder con éxito
+        res.json({ message: 'Cliente Masivo agregado con éxito.' });
+    } catch (error) {
+        console.error('POST /admin/addMassive - Error al agregar Cliente Masivo:', error);
+        res.status(500).json({ error: 'There was an error adding the Massive Client.' });
+    }
+});
+
+// Ruta GET para la página administrativa (protegido con autenticación básica)
 app.use(
   '/admin',
   basicAuth({
@@ -714,7 +798,25 @@ app.get('/admin', async (req, res) => {
     console.log(`GET /admin - Clientes Julian obtenidos: ${julianClients.length}`);
     console.log('Datos de clientes Julian:', julianClients);
 
-    res.render('admin', { clients, manualClients, julianClients });
+    // Obtener clientes Mayoristas ordenados por fecha
+    const snapshotWholesaleClients = await db.collection('wholesaleClients').orderBy('submissionDate', 'desc').get();
+    const wholesaleClients = [];
+    snapshotWholesaleClients.forEach((doc) => {
+      wholesaleClients.push({ id: doc.id, ...doc.data() });
+    });
+    console.log(`GET /admin - Clientes Mayoristas obtenidos: ${wholesaleClients.length}`);
+    console.log('Datos de clientes Mayoristas:', wholesaleClients);
+
+    // Obtener clientes Masivo ordenados por fecha
+    const snapshotMassiveClients = await db.collection('massiveClients').orderBy('submissionDate', 'desc').get();
+    const massiveClients = [];
+    snapshotMassiveClients.forEach((doc) => {
+      massiveClients.push({ id: doc.id, ...doc.data() });
+    });
+    console.log(`GET /admin - Clientes Masivo obtenidos: ${massiveClients.length}`);
+    console.log('Datos de clientes Masivo:', massiveClients);
+
+    res.render('admin', { clients, manualClients, julianClients, wholesaleClients, massiveClients });
     console.log('GET /admin - Página administrativa renderizada con éxito');
   } catch (error) {
     console.error('GET /admin - Error al obtener los clientes:', error);

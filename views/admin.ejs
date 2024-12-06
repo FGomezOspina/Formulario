@@ -34,6 +34,9 @@
             padding: 0;
             width: 80%;
             max-width: 700px;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
         }
 
         .modal-content img {
@@ -47,7 +50,7 @@
             position: absolute;
             top: 10px;
             right: 25px;
-            color: #fff;
+            color: #000;
             font-size: 35px;
             font-weight: bold;
             cursor: pointer;
@@ -161,6 +164,85 @@
 
         .tab-content.active {
             display: block;
+        }
+
+        /* Estilos para el botón "Agregar Usuario" */
+        .add-user-button {
+            background-color: #008CBA; /* Azul */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: background-color 0.3s;
+        }
+
+        .add-user-button:hover {
+            background-color: #007B9E;
+        }
+
+        /* Formulario de Agregar Usuario */
+        .add-user-form {
+            display: none; /* Oculto por defecto */
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        .add-user-form.active {
+            display: block;
+        }
+
+        .add-user-form .form-group {
+            margin-bottom: 15px;
+        }
+
+        .add-user-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .add-user-form input[type="text"],
+        .add-user-form input[type="email"],
+        .add-user-form input[type="url"],
+        .add-user-form select,
+        .add-user-form textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .add-user-form button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .add-user-form button:hover {
+            background-color: #45a049;
+        }
+
+        /* Estilos para los botones de cerrar formulario */
+        .close-add-user-form {
+            background-color: #f44336; /* Rojo */
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .close-add-user-form:hover {
+            background-color: #da190b;
         }
     </style>
 </head>
@@ -310,8 +392,79 @@
         <div id="mayoristas" class="tab-content">
             <div class="table-container">
                 <h2>Clientes Mayoristas</h2>
-                <!-- Aquí puedes agregar la tabla para Clientes Mayoristas en el futuro -->
-                <p>Aún no hay datos para Clientes Mayoristas.</p>
+                <button class="add-user-button" id="addWholesaleUserBtn">Agregar Usuario</button>
+
+                <!-- Modal para Agregar Cliente Mayorista -->
+                <div id="addWholesaleUserModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close-modal" id="closeWholesaleModal">&times;</span>
+                        <h2>Agregar Cliente Mayorista</h2>
+                        <form id="addWholesaleUserForm">
+                            <div class="form-group">
+                                <label for="wholesale-name">Nombre</label>
+                                <input type="text" id="wholesale-name" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="wholesale-contact">Contacto</label>
+                                <input type="text" id="wholesale-contact" name="contact">
+                            </div>
+                            <div class="form-group">
+                                <label for="wholesale-company">Empresa</label>
+                                <input type="text" id="wholesale-company" name="company">
+                            </div>
+                            <div class="form-group">
+                                <label for="wholesale-website">Website</label>
+                                <input type="url" id="wholesale-website" name="website">
+                            </div>
+                            <div class="form-group">
+                                <label for="wholesale-email">Correo Electrónico</label>
+                                <input type="email" id="wholesale-email" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="wholesale-country">País</label>
+                                <input type="text" id="wholesale-country" name="country">
+                            </div>
+                            <div class="form-group">
+                                <label for="wholesale-observations">Observaciones</label>
+                                <textarea id="wholesale-observations" name="observations" rows="4"></textarea>
+                            </div>
+                            <button type="submit">Agregar</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Tabla para Clientes Mayoristas -->
+                <table id="wholesaleClientsTable" class="display">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Contacto</th>
+                            <th>Empresa</th>
+                            <th>Website</th>
+                            <th>Correo Electrónico</th>
+                            <th>País</th>
+                            <th>Observaciones</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% wholesaleClients.forEach(client => { %>
+                            <tr>
+                                <td><%= client.name %></td>
+                                <td><%= client.contact %></td>
+                                <td><%= client.company %></td>
+                                <td><%= client.website ? `<a href="${client.website}" target="_blank">${client.website}</a>` : 'N/A' %></td>
+                                <td><%= client.email %></td>
+                                <td><%= client.country %></td>
+                                <td><%= client.observations %></td>
+                                <td>
+                                    <button class="action-button edit-button" data-id="<%= client.id %>" data-collection="wholesaleClients">Editar</button>
+                                    <button class="action-button delete-button" data-id="<%= client.id %>" data-collection="wholesaleClients">Eliminar</button>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -319,8 +472,79 @@
         <div id="masivo" class="tab-content">
             <div class="table-container">
                 <h2>Clientes Masivo</h2>
-                <!-- Aquí puedes agregar la tabla para Clientes Masivo en el futuro -->
-                <p>Aún no hay datos para Clientes Masivo.</p>
+                <button class="add-user-button" id="addMassiveUserBtn">Agregar Usuario</button>
+
+                <!-- Modal para Agregar Cliente Masivo -->
+                <div id="addMassiveUserModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close-modal" id="closeMassiveModal">&times;</span>
+                        <h2>Agregar Cliente Masivo</h2>
+                        <form id="addMassiveUserForm">
+                            <div class="form-group">
+                                <label for="massive-name">Nombre</label>
+                                <input type="text" id="massive-name" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="massive-contact">Contacto</label>
+                                <input type="text" id="massive-contact" name="contact">
+                            </div>
+                            <div class="form-group">
+                                <label for="massive-company">Empresa</label>
+                                <input type="text" id="massive-company" name="company">
+                            </div>
+                            <div class="form-group">
+                                <label for="massive-website">Website</label>
+                                <input type="url" id="massive-website" name="website">
+                            </div>
+                            <div class="form-group">
+                                <label for="massive-email">Correo Electrónico</label>
+                                <input type="email" id="massive-email" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="massive-country">País</label>
+                                <input type="text" id="massive-country" name="country">
+                            </div>
+                            <div class="form-group">
+                                <label for="massive-observations">Observaciones</label>
+                                <textarea id="massive-observations" name="observations" rows="4"></textarea>
+                            </div>
+                            <button type="submit">Agregar</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Tabla para Clientes Masivo -->
+                <table id="massiveClientsTable" class="display">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Contacto</th>
+                            <th>Empresa</th>
+                            <th>Website</th>
+                            <th>Correo Electrónico</th>
+                            <th>País</th>
+                            <th>Observaciones</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% massiveClients.forEach(client => { %>
+                            <tr>
+                                <td><%= client.name %></td>
+                                <td><%= client.contact %></td>
+                                <td><%= client.company %></td>
+                                <td><%= client.website ? `<a href="${client.website}" target="_blank">${client.website}</a>` : 'N/A' %></td>
+                                <td><%= client.email %></td>
+                                <td><%= client.country %></td>
+                                <td><%= client.observations %></td>
+                                <td>
+                                    <button class="action-button edit-button" data-id="<%= client.id %>" data-collection="massiveClients">Editar</button>
+                                    <button class="action-button delete-button" data-id="<%= client.id %>" data-collection="massiveClients">Eliminar</button>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
             </div>
         </div>
     </main>
@@ -382,9 +606,9 @@
                 ]
             });
 
-            // Inicializar DataTables para Clientes Mayoristas (futuro)
+            // Inicializar DataTables para Clientes Mayoristas
             $('#wholesaleClientsTable').DataTable({
-                "order": [[6, "desc"], [4, "desc"]], // Ordenar por Prioridad y Fecha de Envío
+                "order": [[6, "desc"], [4, "desc"]], // Ordenar por Observaciones y Fecha de Envío
                 "pageLength": 10,
                 "language": {
                     "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json" // Cambiar a español
@@ -396,9 +620,9 @@
                 ]
             });
 
-            // Inicializar DataTables para Clientes Masivo (futuro)
+            // Inicializar DataTables para Clientes Masivo
             $('#massiveClientsTable').DataTable({
-                "order": [[6, "desc"], [4, "desc"]], // Ordenar por Prioridad y Fecha de Envío
+                "order": [[6, "desc"], [4, "desc"]], // Ordenar por Observaciones y Fecha de Envío
                 "pageLength": 10,
                 "language": {
                     "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json" // Cambiar a español
@@ -420,9 +644,161 @@
                 $(this).addClass('active');
                 $("#" + tab_id).addClass('active');
             });
+
+            // Funcionalidad de los Botones "Agregar Usuario"
+            $('#addWholesaleUserBtn').click(function() {
+                $('#addWholesaleUserModal').css('display', 'flex');
+            });
+
+            $('#addMassiveUserBtn').click(function() {
+                $('#addMassiveUserModal').css('display', 'flex');
+            });
+
+            // Cerrar los modales al hacer clic en la 'x'
+            $('#closeWholesaleModal').click(function() {
+                $('#addWholesaleUserModal').css('display', 'none');
+                $('#addWholesaleUserForm')[0].reset();
+            });
+
+            $('#closeMassiveModal').click(function() {
+                $('#addMassiveUserModal').css('display', 'none');
+                $('#addMassiveUserForm')[0].reset();
+            });
+
+            // Cerrar el modal al hacer clic fuera del contenido
+            window.onclick = function(event) {
+                if (event.target == document.getElementById('logoModal')) {
+                    $('#logoModal').css('display', 'none');
+                }
+                if (event.target == document.getElementById('addWholesaleUserModal')) {
+                    $('#addWholesaleUserModal').css('display', 'none');
+                    $('#addWholesaleUserForm')[0].reset();
+                }
+                if (event.target == document.getElementById('addMassiveUserModal')) {
+                    $('#addMassiveUserModal').css('display', 'none');
+                    $('#addMassiveUserForm')[0].reset();
+                }
+            }
+
+            // Cerrar el modal con la tecla Esc
+            document.addEventListener('keydown', function(event) {
+                if (event.key === "Escape") {
+                    $('#logoModal').css('display', 'none');
+                    $('#addWholesaleUserModal').css('display', 'none');
+                    $('#addMassiveUserModal').css('display', 'none');
+                    $('#addWholesaleUserForm')[0].reset();
+                    $('#addMassiveUserForm')[0].reset();
+                }
+            });
+
+            // Funcionalidad del Modal de Logo
+            const modal = document.getElementById("logoModal");
+            const modalImg = document.getElementById("modalImage");
+            const closeBtn = document.getElementsByClassName("close-modal")[0];
+
+            // Abrir el modal al hacer clic en una imagen de logo
+            const logos = document.querySelectorAll(".logo-image.clickable");
+            logos.forEach(function(logo) {
+                logo.addEventListener("click", function() {
+                    modal.style.display = "flex";
+                    modalImg.src = this.src;
+                });
+            });
+
+            // Cerrar el modal al hacer clic en la 'x'
+            closeBtn.onclick = function() { 
+                modal.style.display = "none";
+            }
+
+            // Manejar el clic en el botón de eliminar
+            $(document).on('click', '.delete-button', function() {
+                const docId = $(this).data('id');
+                const collection = $(this).data('collection');
+                if (confirm('¿Estás seguro de que deseas eliminar esta entrada?')) {
+                    $.ajax({
+                        url: '/admin/delete',
+                        type: 'POST',
+                        data: { id: docId, collection: collection },
+                        success: function(response) {
+                            alert('Entrada eliminada con éxito.');
+                            location.reload();
+                        },
+                        error: function(err) {
+                            alert('Error al eliminar la entrada.');
+                        }
+                    });
+                }
+            });
+
+            // Manejar el clic en el botón de editar
+            $(document).on('click', '.edit-button', function() {
+                const docId = $(this).data('id');
+                const collection = $(this).data('collection');
+                window.location.href = `/admin/edit?id=${docId}&collection=${collection}`;
+            });
+
+            // Manejar el envío del formulario de agregar Cliente Mayorista
+            $('#addWholesaleUserForm').submit(function(event) {
+                event.preventDefault();
+                const formData = {
+                    name: $('#wholesale-name').val(),
+                    contact: $('#wholesale-contact').val(),
+                    company: $('#wholesale-company').val(),
+                    website: $('#wholesale-website').val(),
+                    email: $('#wholesale-email').val(),
+                    country: $('#wholesale-country').val(),
+                    observations: $('#wholesale-observations').val()
+                };
+
+                $.ajax({
+                    url: '/admin/addWholesale',
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        alert('Cliente Mayorista agregado con éxito.');
+                        $('#addWholesaleUserModal').css('display', 'none');
+                        $('#addWholesaleUserForm')[0].reset();
+                        location.reload();
+                    },
+                    error: function(err) {
+                        alert('Error al agregar el Cliente Mayorista.');
+                        console.error(err);
+                    }
+                });
+            });
+
+            // Manejar el envío del formulario de agregar Cliente Masivo
+            $('#addMassiveUserForm').submit(function(event) {
+                event.preventDefault();
+                const formData = {
+                    name: $('#massive-name').val(),
+                    contact: $('#massive-contact').val(),
+                    company: $('#massive-company').val(),
+                    website: $('#massive-website').val(),
+                    email: $('#massive-email').val(),
+                    country: $('#massive-country').val(),
+                    observations: $('#massive-observations').val()
+                };
+
+                $.ajax({
+                    url: '/admin/addMassive',
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        alert('Cliente Masivo agregado con éxito.');
+                        $('#addMassiveUserModal').css('display', 'none');
+                        $('#addMassiveUserForm')[0].reset();
+                        location.reload();
+                    },
+                    error: function(err) {
+                        alert('Error al agregar el Cliente Masivo.');
+                        console.error(err);
+                    }
+                });
+            });
         });
 
-        // Funcionalidad del Modal
+        // Funcionalidad del Modal de Logo
         const modal = document.getElementById("logoModal");
         const modalImg = document.getElementById("modalImage");
         const closeBtn = document.getElementsByClassName("close-modal")[0];
@@ -484,4 +860,3 @@
     </script>
 </body>
 </html>
-
