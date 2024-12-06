@@ -41,7 +41,8 @@
         input[type="text"],
         input[type="email"],
         input[type="number"],
-        textarea {
+        textarea,
+        select {
             width: 100%;
             padding: 10px;
             border: 1px solid #ccc;
@@ -145,7 +146,16 @@
             </div>
             <div class="form-group">
                 <label for="country">País:</label>
-                <input type="text" name="country" id="country" value="<%= data.country %>">
+                <select name="country" id="country">
+                    <option value="Francia" <%= data.country === 'Francia' ? 'selected' : '' %>>Francia</option>
+                    <option value="Estados Unidos" <%= data.country === 'Estados Unidos' ? 'selected' : '' %>>Estados Unidos</option>
+                    <option value="Emiratos Arabes" <%= data.country === 'Emiratos Arabes' ? 'selected' : '' %>>Emiratos Arabes</option>
+                    <option value="España" <%= data.country === 'España' ? 'selected' : '' %>>España</option>
+                    <option value="Colombia" <%= data.country === 'Colombia' ? 'selected' : '' %>>Colombia</option>
+                    <option value="Holanda" <%= data.country === 'Holanda' ? 'selected' : '' %>>Holanda</option>
+                    <option value="China" <%= data.country === 'China' ? 'selected' : '' %>>China</option>
+                    <option value="Italia" <%= data.country === 'Italia' ? 'selected' : '' %>>Italia</option>
+                </select>
             </div>
             <div class="form-group">
                 <label for="observations">Observaciones:</label>
@@ -154,7 +164,7 @@
         <% } %>
 
         <% if (collection === 'clients' || collection === 'julianClients' || collection === 'manualClients') { %>
-            <!-- Campo Notas Adicionales (Solo para ciertas colecciones) -->
+            <!-- Campo Notas Adicionales -->
             <div class="form-group">
                 <label for="additionalNotes">Notas Adicionales:</label>
                 <textarea name="additionalNotes" id="additionalNotes" rows="4"><%= data.additionalNotes %></textarea>
@@ -162,7 +172,7 @@
         <% } %>
 
         <% if (collection === 'clients' || collection === 'julianClients' || collection === 'manualClients') { %>
-            <!-- Campo Logo (Solo para ciertas colecciones) -->
+            <!-- Campo Logo -->
             <div class="form-group">
                 <label for="logo">Logo:</label>
                 <% if (data.logoURL) { %>
@@ -175,7 +185,7 @@
         <% } %>
 
         <% if (collection === 'clients' || collection === 'julianClients' || collection === 'manualClients') { %>
-            <!-- Campo Prioridad (Solo para ciertas colecciones) -->
+            <!-- Campo Prioridad -->
             <div class="form-group">
                 <label for="priority">Prioridad:</label>
                 <input type="number" name="priority" id="priority" value="<%= data.priority || 0 %>" min="0">
@@ -184,14 +194,9 @@
 
         <!-- Botones de Envío y Cancelación -->
         <% if (collection === 'wholesaleClients' || collection === 'massiveClients') { %>
-            <!-- Para Clientes Mayoristas y Masivo, no se incluyen Notas Adicionales, Logo y Prioridad -->
-            <!-- Asegúrate de que estos campos no estén presentes en el formulario -->
-        <% } else { %>
             <button type="submit">Guardar Cambios</button>
             <button type="button" class="cancel-button" onclick="window.history.back()">Cancelar</button>
-        <% } %>
-
-        <% if (collection === 'wholesaleClients' || collection === 'massiveClients') { %>
+        <% } else { %>
             <button type="submit">Guardar Cambios</button>
             <button type="button" class="cancel-button" onclick="window.history.back()">Cancelar</button>
         <% } %>
