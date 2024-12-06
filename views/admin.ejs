@@ -414,7 +414,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="wholesale-website">Website</label>
-                                <input type="url" id="wholesale-website" name="website">
+                                <input type="text" id="wholesale-website" name="website">
                             </div>
                             <div class="form-group">
                                 <label for="wholesale-email">Correo Electrónico</label>
@@ -453,7 +453,7 @@
                                 <td><%= client.name %></td>
                                 <td><%= client.contact %></td>
                                 <td><%= client.company %></td>
-                                <td><%= client.website ? `<a href="${client.website}" target="_blank">${client.website}</a>` : 'N/A' %></td>
+                                <td><%= client.website || 'N/A' %></td> <!-- Cambiado a texto simple -->
                                 <td><%= client.email %></td>
                                 <td><%= client.country %></td>
                                 <td><%= client.observations %></td>
@@ -494,7 +494,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="massive-website">Website</label>
-                                <input type="url" id="massive-website" name="website">
+                                <input type="text" id="massive-website" name="website">
                             </div>
                             <div class="form-group">
                                 <label for="massive-email">Correo Electrónico</label>
@@ -533,7 +533,7 @@
                                 <td><%= client.name %></td>
                                 <td><%= client.contact %></td>
                                 <td><%= client.company %></td>
-                                <td><%= client.website ? `<a href="${client.website}" target="_blank">${client.website}</a>` : 'N/A' %></td>
+                                <td><%= client.website || 'N/A' %></td> <!-- Cambiado a texto simple -->
                                 <td><%= client.email %></td>
                                 <td><%= client.country %></td>
                                 <td><%= client.observations %></td>
@@ -744,7 +744,7 @@
                     name: $('#wholesale-name').val(),
                     contact: $('#wholesale-contact').val(),
                     company: $('#wholesale-company').val(),
-                    website: $('#wholesale-website').val(),
+                    website: $('#wholesale-website').val(), // Campo tipo texto
                     email: $('#wholesale-email').val(),
                     country: $('#wholesale-country').val(),
                     observations: $('#wholesale-observations').val()
@@ -774,7 +774,7 @@
                     name: $('#massive-name').val(),
                     contact: $('#massive-contact').val(),
                     company: $('#massive-company').val(),
-                    website: $('#massive-website').val(),
+                    website: $('#massive-website').val(), // Campo tipo texto
                     email: $('#massive-email').val(),
                     country: $('#massive-country').val(),
                     observations: $('#massive-observations').val()
