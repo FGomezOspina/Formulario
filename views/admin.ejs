@@ -292,7 +292,7 @@
                                         N/A
                                     <% } %>
                                 </td>
-                                <td><%= client.priority || 0 %></td> <!-- Mostrar prioridad -->
+                                <td><%= client.priority || 0 %></td>
                                 <td>
                                     <button class="action-button edit-button" data-id="<%= client.id %>" data-collection="clients">Editar</button>
                                     <button class="action-button delete-button" data-id="<%= client.id %>" data-collection="clients">Eliminar</button>
@@ -334,7 +334,7 @@
                                         N/A
                                     <% } %>
                                 </td>
-                                <td><%= client.priority || 0 %></td> <!-- Mostrar prioridad -->
+                                <td><%= client.priority || 0 %></td>
                                 <td>
                                     <button class="action-button edit-button" data-id="<%= client.id %>" data-collection="julianClients">Editar</button>
                                     <button class="action-button delete-button" data-id="<%= client.id %>" data-collection="julianClients">Eliminar</button>
@@ -376,7 +376,7 @@
                                         N/A
                                     <% } %>
                                 </td>
-                                <td><%= client.priority || 0 %></td> <!-- Mostrar prioridad -->
+                                <td><%= client.priority || 0 %></td>
                                 <td>
                                     <button class="action-button edit-button" data-id="<%= client.id %>" data-collection="manualClients">Editar</button>
                                     <button class="action-button delete-button" data-id="<%= client.id %>" data-collection="manualClients">Eliminar</button>
@@ -422,7 +422,17 @@
                             </div>
                             <div class="form-group">
                                 <label for="wholesale-country">País</label>
-                                <input type="text" id="wholesale-country" name="country">
+                                <select id="wholesale-country" name="country">
+                                    <option value="">Seleccione un país</option>
+                                    <option value="Francia">Francia</option>
+                                    <option value="Estados Unidos">Estados Unidos</option>
+                                    <option value="Emiratos Arabes">Emiratos Arabes</option>
+                                    <option value="España">España</option>
+                                    <option value="Colombia">Colombia</option>
+                                    <option value="Holanda">Holanda</option>
+                                    <option value="China">China</option>
+                                    <option value="Italia">Italia</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label for="wholesale-observations">Observaciones</label>
@@ -453,7 +463,7 @@
                                 <td><%= client.name %></td>
                                 <td><%= client.contact %></td>
                                 <td><%= client.company %></td>
-                                <td><%= client.website || 'N/A' %></td> <!-- Cambiado a texto simple -->
+                                <td><%= client.website || 'N/A' %></td>
                                 <td><%= client.email %></td>
                                 <td><%= client.country %></td>
                                 <td><%= client.observations %></td>
@@ -502,7 +512,17 @@
                             </div>
                             <div class="form-group">
                                 <label for="massive-country">País</label>
-                                <input type="text" id="massive-country" name="country">
+                                <select id="massive-country" name="country">
+                                    <option value="">Seleccione un país</option>
+                                    <option value="Francia">Francia</option>
+                                    <option value="Estados Unidos">Estados Unidos</option>
+                                    <option value="Emiratos Arabes">Emiratos Arabes</option>
+                                    <option value="España">España</option>
+                                    <option value="Colombia">Colombia</option>
+                                    <option value="Holanda">Holanda</option>
+                                    <option value="China">China</option>
+                                    <option value="Italia">Italia</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label for="massive-observations">Observaciones</label>
@@ -533,7 +553,7 @@
                                 <td><%= client.name %></td>
                                 <td><%= client.contact %></td>
                                 <td><%= client.company %></td>
-                                <td><%= client.website || 'N/A' %></td> <!-- Cambiado a texto simple -->
+                                <td><%= client.website || 'N/A' %></td>
                                 <td><%= client.email %></td>
                                 <td><%= client.country %></td>
                                 <td><%= client.observations %></td>
@@ -566,71 +586,71 @@
         $(document).ready(function() {
             // Inicializar DataTables para Clientes por Tarjeta IFTF
             $('#clientsTable').DataTable({
-                "order": [[5, "desc"], [3, "desc"]], // Ordenar por Prioridad y Fecha de Envío
+                "order": [[5, "desc"], [3, "desc"]],
                 "pageLength": 10,
                 "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json" // Cambiar a español
+                    "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"
                 },
                 "responsive": true,
                 "autoWidth": false,
                 "columnDefs": [
-                    { "orderable": false, "targets": -1 } // Desactivar ordenamiento en la última columna (Acciones)
+                    { "orderable": false, "targets": -1 }
                 ]
             });
 
             // Inicializar DataTables para Tarjetas Julian
             $('#julianClientsTable').DataTable({
-                "order": [[5, "desc"], [3, "desc"]], // Ajustado el índice de prioridad
+                "order": [[5, "desc"], [3, "desc"]],
                 "pageLength": 10,
                 "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json" // Cambiar a español
+                    "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"
                 },
                 "responsive": true,
                 "autoWidth": false,
                 "columnDefs": [
-                    { "orderable": false, "targets": -1 } // Desactivar ordenamiento en la última columna (Acciones)
+                    { "orderable": false, "targets": -1 }
                 ]
             });
 
             // Inicializar DataTables para Tarjetas Agregadas Manualmente
             $('#manualClientsTable').DataTable({
-                "order": [[5, "desc"], [3, "desc"]], // Ajustado el índice de prioridad
+                "order": [[5, "desc"], [3, "desc"]],
                 "pageLength": 10,
                 "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json" // Cambiar a español
+                    "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"
                 },
                 "responsive": true,
                 "autoWidth": false,
                 "columnDefs": [
-                    { "orderable": false, "targets": -1 } // Desactivar ordenamiento en la última columna (Acciones)
+                    { "orderable": false, "targets": -1 }
                 ]
             });
 
             // Inicializar DataTables para Clientes Mayoristas
             $('#wholesaleClientsTable').DataTable({
-                "order": [[6, "desc"], [4, "desc"]], // Ordenar por Observaciones y Fecha de Envío
+                "order": [[6, "desc"], [4, "desc"]],
                 "pageLength": 10,
                 "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json" // Cambiar a español
+                    "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"
                 },
                 "responsive": true,
                 "autoWidth": false,
                 "columnDefs": [
-                    { "orderable": false, "targets": -1 } // Desactivar ordenamiento en la última columna (Acciones)
+                    { "orderable": false, "targets": -1 }
                 ]
             });
 
             // Inicializar DataTables para Clientes Masivo
             $('#massiveClientsTable').DataTable({
-                "order": [[6, "desc"], [4, "desc"]], // Ordenar por Observaciones y Fecha de Envío
+                "order": [[6, "desc"], [4, "desc"]],
                 "pageLength": 10,
                 "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json" // Cambiar a español
+                    "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"
                 },
                 "responsive": true,
                 "autoWidth": false,
                 "columnDefs": [
-                    { "orderable": false, "targets": -1 } // Desactivar ordenamiento en la última columna (Acciones)
+                    { "orderable": false, "targets": -1 }
                 ]
             });
 
@@ -744,7 +764,7 @@
                     name: $('#wholesale-name').val(),
                     contact: $('#wholesale-contact').val(),
                     company: $('#wholesale-company').val(),
-                    website: $('#wholesale-website').val(), // Campo tipo texto
+                    website: $('#wholesale-website').val(),
                     email: $('#wholesale-email').val(),
                     country: $('#wholesale-country').val(),
                     observations: $('#wholesale-observations').val()
@@ -774,7 +794,7 @@
                     name: $('#massive-name').val(),
                     contact: $('#massive-contact').val(),
                     company: $('#massive-company').val(),
-                    website: $('#massive-website').val(), // Campo tipo texto
+                    website: $('#massive-website').val(),
                     email: $('#massive-email').val(),
                     country: $('#massive-country').val(),
                     observations: $('#massive-observations').val()
@@ -831,7 +851,7 @@
             }
         });
 
-        // Manejar el clic en el botón de eliminar
+        // Manejar el clic en el botón de eliminar (de nuevo por redundancia)
         $(document).on('click', '.delete-button', function() {
             const docId = $(this).data('id');
             const collection = $(this).data('collection');
@@ -851,7 +871,7 @@
             }
         });
 
-        // Manejar el clic en el botón de editar
+        // Manejar el clic en el botón de editar (de nuevo por redundancia)
         $(document).on('click', '.edit-button', function() {
             const docId = $(this).data('id');
             const collection = $(this).data('collection');
