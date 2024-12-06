@@ -46,7 +46,7 @@ const fileFilter = function (req, file, cb) {
   if (mimetype && extname) {
     return cb(null, true);
   }
-  cb(new Error('Only JPEG and PNG images are allowed'));
+  cb(new Error('Solo se permiten imágenes JPEG y PNG'));
 };
 
 // Inicializar multer con la configuración
@@ -211,16 +211,16 @@ function ordenarProductos(productos, prioritarios, ordenCategorias) {
 // Función para generar HTML de los productos sin la columna de precios
 function generateProductsHTML(products) {
   if (products.length === 0) {
-      return '<p>No products are available at this time.</p>';
+      return '<p>No hay productos disponibles en este momento.</p>';
   }
 
   let html = `
-      <h2>Available Products:</h2>
+      <h2>Productos Disponibles:</h2>
       <table>
           <tr>
-              <th>Image</th>
-              <th>Name</th>
-              <th>View Product</th>
+              <th>Imagen</th>
+              <th>Nombre</th>
+              <th>Ver Producto</th>
           </tr>
   `;
   
@@ -241,7 +241,7 @@ function generateProductsHTML(products) {
           <tr>
               <td>${imageUrl ? `<img src="${imageUrl}" alt="${product.name}" class="product-image" style="width:50px;height:auto;">` : 'N/A'}</td>
               <td>${product.name}</td>
-              <td><a href="${productUrl}" target="_blank">View Product</a></td>
+              <td><a href="${productUrl}" target="_blank">Ver Producto</a></td>
           </tr>
       `;
   });
@@ -283,7 +283,7 @@ async function sendThankYouEmail(toEmail, clientData = {}) {
           to: toEmail,
           from: 'info@fli.com.co',
           replyTo: 'info@fli.com.co',
-          subject: 'Thank You for Contacting Us!',
+          subject: '¡Gracias por Contactarnos!',
           html: htmlContent,
       };
       
@@ -292,6 +292,14 @@ async function sendThankYouEmail(toEmail, clientData = {}) {
   } catch (error) {
       console.error(`Error al enviar el correo a ${toEmail}:`, error.response ? error.response.body : error.message);
   }
+}
+
+// Función para asegurar que la URL tenga un protocolo
+function ensureUrlProtocol(url) {
+    if (!/^https?:\/\//i.test(url)) {
+        return 'http://' + url;
+    }
+    return url;
 }
 
 // Ruta GET para servir el formulario principal
@@ -316,7 +324,7 @@ app.post('/extract', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'log
     // Validar que se haya subido una imagen para escaneo de texto
     if (!files['image'] || files['image'].length === 0) {
       console.warn('POST /extract - No se subió ninguna imagen para extracción de texto');
-      return res.status(400).json({ error: 'No image uploaded for text extraction.' });
+      return res.status(400).json({ error: 'No se subió ninguna imagen para extracción de texto.' });
     }
 
     const imageFile = files['image'][0];
@@ -375,7 +383,7 @@ app.post('/extract', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'log
     console.log('POST /extract - Respuesta enviada con éxito');
   } catch (error) {
     console.error('POST /extract - Error durante la extracción de texto:', error);
-    res.status(500).json({ error: 'There was an error extracting text from the image.' });
+    res.status(500).json({ error: 'Hubo un error al extraer el texto de la imagen.' });
   }
 });
 
@@ -390,19 +398,19 @@ app.post('/upload', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'logo
     // Validar que se haya proporcionado el texto extraído
     if (!extractedText) {
       console.warn('POST /upload - No se proporcionó texto extraído');
-      return res.status(400).json({ error: 'No extracted text provided.' });
+      return res.status(400).json({ error: 'No se proporcionó texto extraído.' });
     }
 
     // Validar que se haya proporcionado el email
     if (!email_card) {
       console.warn('POST /upload - No se proporcionó el email');
-      return res.status(400).json({ error: 'Email is required.' });
+      return res.status(400).json({ error: 'El correo electrónico es requerido.' });
     }
 
     // Validar el formato del email en el servidor
     if (!validator.isEmail(email_card)) {
       console.warn('POST /upload - Formato de email inválido:', email_card);
-      return res.status(400).json({ error: 'Invalid email format.' });
+      return res.status(400).json({ error: 'Formato de correo electrónico inválido.' });
     }
 
     let logoURL = '';
@@ -480,11 +488,11 @@ app.post('/upload', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'logo
     });
 
     // Responder con éxito
-    res.json({ message: 'Form submitted successfully.' });
+    res.json({ message: 'Formulario enviado exitosamente.' });
     console.log('POST /upload - Respuesta enviada con éxito');
   } catch (error) {
     console.error('POST /upload - Error al guardar los datos:', error);
-    res.status(500).json({ error: 'There was an error saving your data.' });
+    res.status(500).json({ error: 'Hubo un error al guardar tus datos.' });
   }
 });
 
@@ -503,13 +511,13 @@ app.post('/uploadManual', upload.fields([{ name: 'logo_manual', maxCount: 1 }]),
     // Validar que se haya proporcionado el email
     if (!email_manual) {
       console.warn('POST /uploadManual - No se proporcionó el email');
-      return res.status(400).json({ error: 'Email is required.' });
+      return res.status(400).json({ error: 'El correo electrónico es requerido.' });
     }
 
     // Validar el formato del email
     if (!validator.isEmail(email_manual)) {
       console.warn('POST /uploadManual - Formato de email inválido:', email_manual);
-      return res.status(400).json({ error: 'Invalid email format.' });
+      return res.status(400).json({ error: 'Formato de correo electrónico inválido.' });
     }
 
     let logoURL = '';
@@ -572,11 +580,11 @@ app.post('/uploadManual', upload.fields([{ name: 'logo_manual', maxCount: 1 }]),
     });
 
     // Responder con éxito
-    res.json({ message: 'Manual form submitted successfully.' });
+    res.json({ message: 'Formulario manual enviado exitosamente.' });
     console.log('POST /uploadManual - Respuesta enviada con éxito');
   } catch (error) {
     console.error('POST /uploadManual - Error al guardar los datos manuales:', error);
-    res.status(500).json({ error: 'There was an error saving your manual data.' });
+    res.status(500).json({ error: 'Hubo un error al guardar tus datos manuales.' });
   }
 });
 
@@ -595,13 +603,13 @@ app.post('/uploadJulian', upload.fields([{ name: 'logo_julian', maxCount: 1 }]),
     // Validar que se haya proporcionado el email
     if (!email_julian) {
       console.warn('POST /uploadJulian - No se proporcionó el email');
-      return res.status(400).json({ error: 'Email is required.' });
+      return res.status(400).json({ error: 'El correo electrónico es requerido.' });
     }
 
     // Validar el formato del email
     if (!validator.isEmail(email_julian)) {
       console.warn('POST /uploadJulian - Formato de email inválido:', email_julian);
-      return res.status(400).json({ error: 'Invalid email format.' });
+      return res.status(400).json({ error: 'Formato de correo electrónico inválido.' });
     }
 
     let logoURL = '';
@@ -664,11 +672,11 @@ app.post('/uploadJulian', upload.fields([{ name: 'logo_julian', maxCount: 1 }]),
     });
 
     // Responder con éxito
-    res.json({ message: 'Julian form submitted successfully.' });
+    res.json({ message: 'Formulario Julian enviado exitosamente.' });
     console.log('POST /uploadJulian - Respuesta enviada con éxito');
   } catch (error) {
     console.error('POST /uploadJulian - Error al guardar los datos julian:', error);
-    res.status(500).json({ error: 'There was an error saving your Julian data.' });
+    res.status(500).json({ error: 'Hubo un error al guardar tus datos Julian.' });
   }
 });
 
@@ -679,12 +687,12 @@ app.post('/admin/addWholesale', async (req, res) => {
 
         // Validar que se haya proporcionado el email
         if (!email) {
-            return res.status(400).json({ error: 'Email is required.' });
+            return res.status(400).json({ error: 'El correo electrónico es requerido.' });
         }
 
         // Validar el formato del email
         if (!validator.isEmail(email)) {
-            return res.status(400).json({ error: 'Invalid email format.' });
+            return res.status(400).json({ error: 'Formato de correo electrónico inválido.' });
         }
 
         // Crear una nueva entrada de cliente mayorista con los datos recibidos
@@ -710,7 +718,7 @@ app.post('/admin/addWholesale', async (req, res) => {
         res.json({ message: 'Cliente Mayorista agregado con éxito.' });
     } catch (error) {
         console.error('POST /admin/addWholesale - Error al agregar Cliente Mayorista:', error);
-        res.status(500).json({ error: 'There was an error adding the Wholesale Client.' });
+        res.status(500).json({ error: 'Hubo un error al agregar el Cliente Mayorista.' });
     }
 });
 
@@ -721,12 +729,12 @@ app.post('/admin/addMassive', async (req, res) => {
 
         // Validar que se haya proporcionado el email
         if (!email) {
-            return res.status(400).json({ error: 'Email is required.' });
+            return res.status(400).json({ error: 'El correo electrónico es requerido.' });
         }
 
         // Validar el formato del email
         if (!validator.isEmail(email)) {
-            return res.status(400).json({ error: 'Invalid email format.' });
+            return res.status(400).json({ error: 'Formato de correo electrónico inválido.' });
         }
 
         // Crear una nueva entrada de cliente masivo con los datos recibidos
@@ -752,7 +760,7 @@ app.post('/admin/addMassive', async (req, res) => {
         res.json({ message: 'Cliente Masivo agregado con éxito.' });
     } catch (error) {
         console.error('POST /admin/addMassive - Error al agregar Cliente Masivo:', error);
-        res.status(500).json({ error: 'There was an error adding the Massive Client.' });
+        res.status(500).json({ error: 'Hubo un error al agregar el Cliente Masivo.' });
     }
 });
 
@@ -762,7 +770,7 @@ app.use(
   basicAuth({
     users: { admin: process.env.ADMIN_PASS || '1234' },
     challenge: true,
-    realm: 'Firestore Administration',
+    realm: 'Administración de Firestore',
   })
 );
 
@@ -820,7 +828,7 @@ app.get('/admin', async (req, res) => {
     console.log('GET /admin - Página administrativa renderizada con éxito');
   } catch (error) {
     console.error('GET /admin - Error al obtener los clientes:', error);
-    res.status(500).send('There was an error fetching the data.');
+    res.status(500).send('Hubo un error al obtener los datos.');
   }
 });
 
@@ -863,7 +871,7 @@ app.get('/admin/edit', async (req, res) => {
 // Ruta POST para actualizar el documento
 app.post('/admin/edit', upload.single('logo'), async (req, res) => {
     try {
-        const { id, collection, email, name, phone, extractedText, additionalNotes, priority } = req.body;
+        const { id, collection, email, name, phone, contact, company, website, country, observations, extractedText, additionalNotes, priority } = req.body;
         const file = req.file;
 
         if (!id || !collection || !email) {
@@ -875,19 +883,30 @@ app.post('/admin/edit', upload.single('logo'), async (req, res) => {
         // Preparar los datos para actualizar
         const updateData = {
             email: email.trim(),
-            additionalNotes: additionalNotes || '',
-            priority: priority ? parseInt(priority) : 0
         };
 
+        // Manejar campos específicos según la colección
         if (collection === 'clients') {
             updateData.extractedText = extractedText || '';
-        } else {
+            updateData.additionalNotes = additionalNotes || '';
+            updateData.priority = priority ? parseInt(priority) : 0;
+        } else if (collection === 'julianClients' || collection === 'manualClients') {
             updateData.name = name || '';
             updateData.phone = phone || '';
+            updateData.additionalNotes = additionalNotes || '';
+            updateData.priority = priority ? parseInt(priority) : 0;
+        } else if (collection === 'wholesaleClients' || collection === 'massiveClients') {
+            updateData.name = name || '';
+            updateData.contact = contact || '';
+            updateData.company = company || '';
+            updateData.website = website ? website.trim() : '';
+            updateData.country = country || '';
+            updateData.observations = observations || '';
+            // No se incluye 'priority' ni 'additionalNotes' ni 'logo'
         }
 
-        // Si se ha subido un nuevo logo
-        if (file) {
+        // Si se ha subido un nuevo logo y la colección lo soporta
+        if (file && (collection === 'clients' || collection === 'julianClients' || collection === 'manualClients')) {
             const logoPath = file.path;
             const logoFileName = `${collection}Logos/${Date.now()}_${file.originalname}`;
             const firebaseFile = bucket.file(logoFileName);
@@ -927,17 +946,17 @@ app.post('/admin/edit', upload.single('logo'), async (req, res) => {
 
 // Middleware de manejo de errores generales
 app.use((err, req, res, next) => {
-  console.error('General Error Middleware - Error capturado:', err);
+  console.error('Middleware de Error General - Error capturado:', err);
   
   if (req.headers['content-type'] && req.headers['content-type'].includes('application/json')) {
-    return res.status(500).json({ error: 'There was an error processing your request.' });
+    return res.status(500).json({ error: 'Hubo un error al procesar tu solicitud.' });
   } else {
-    return res.status(500).send('There was an error processing your request.');
+    return res.status(500).send('Hubo un error al procesar tu solicitud.');
   }
 });
 
 // Iniciar el servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
 });

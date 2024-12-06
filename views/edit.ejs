@@ -1,6 +1,6 @@
 <!-- views/edit.ejs -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Editar Entrada</title>
@@ -8,20 +8,34 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #4CAF50;
         }
 
         form {
-            max-width: 600px;
+            max-width: 700px;
             margin: auto;
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        div {
-            margin-bottom: 15px;
+        div.form-group {
+            margin-bottom: 20px;
         }
 
         label {
             display: block;
             font-weight: bold;
+            margin-bottom: 8px;
+            color: #555;
         }
 
         input[type="text"],
@@ -29,69 +43,158 @@
         input[type="number"],
         textarea {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
             box-sizing: border-box;
+            font-size: 1em;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        .logo-preview {
+            margin-top: 10px;
+            max-width: 150px;
+            height: auto;
+            border-radius: 4px;
         }
 
         button {
-            padding: 10px 15px;
+            padding: 12px 20px;
             background-color: #4CAF50; /* Verde */
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
         }
 
-        img {
-            margin-top: 10px;
-            max-width: 100px;
-            height: auto;
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .cancel-button {
+            background-color: #f44336; /* Rojo */
+            margin-left: 10px;
+        }
+
+        .cancel-button:hover {
+            background-color: #da190b;
+        }
+
+        @media (max-width: 600px) {
+            form {
+                padding: 20px;
+            }
+
+            .logo-preview {
+                max-width: 100px;
+            }
         }
     </style>
 </head>
 <body>
     <h1>Editar Entrada</h1>
     <form action="/admin/edit" method="POST" enctype="multipart/form-data">
+        <!-- Campos ocultos para ID y Colección -->
         <input type="hidden" name="id" value="<%= data.id %>">
         <input type="hidden" name="collection" value="<%= collection %>">
-        <div>
-            <label for="email">Email:</label>
-            <input type="email" name="email" value="<%= data.email %>" required>
+
+        <!-- Campo Correo Electrónico (Siempre presente) -->
+        <div class="form-group">
+            <label for="email">Correo Electrónico:</label>
+            <input type="email" name="email" id="email" value="<%= data.email %>" required>
         </div>
+
         <% if (collection === 'clients') { %>
-            <div>
+            <!-- Campo Texto Extraído para Clientes IFTF -->
+            <div class="form-group">
                 <label for="extractedText">Texto Extraído:</label>
-                <textarea name="extractedText" rows="4"><%= data.extractedText %></textarea>
+                <textarea name="extractedText" id="extractedText" rows="4"><%= data.extractedText %></textarea>
             </div>
-        <% } else { %>
-            <div>
+        <% } else if (collection === 'julianClients' || collection === 'manualClients') { %>
+            <!-- Campos Nombre y Teléfono para Clientes Julian y Manual -->
+            <div class="form-group">
                 <label for="name">Nombre:</label>
-                <input type="text" name="name" value="<%= data.name %>">
+                <input type="text" name="name" id="name" value="<%= data.name %>">
             </div>
-            <div>
+            <div class="form-group">
                 <label for="phone">Teléfono:</label>
-                <input type="text" name="phone" value="<%= data.phone %>">
+                <input type="text" name="phone" id="phone" value="<%= data.phone %>">
+            </div>
+        <% } else if (collection === 'wholesaleClients' || collection === 'massiveClients') { %>
+            <!-- Campos específicos para Clientes Mayoristas y Masivo -->
+            <div class="form-group">
+                <label for="name">Nombre:</label>
+                <input type="text" name="name" id="name" value="<%= data.name %>" required>
+            </div>
+            <div class="form-group">
+                <label for="contact">Contacto:</label>
+                <input type="text" name="contact" id="contact" value="<%= data.contact %>">
+            </div>
+            <div class="form-group">
+                <label for="company">Empresa:</label>
+                <input type="text" name="company" id="company" value="<%= data.company %>">
+            </div>
+            <div class="form-group">
+                <label for="website">Website:</label>
+                <input type="text" name="website" id="website" value="<%= data.website %>">
+            </div>
+            <div class="form-group">
+                <label for="country">País:</label>
+                <input type="text" name="country" id="country" value="<%= data.country %>">
+            </div>
+            <div class="form-group">
+                <label for="observations">Observaciones:</label>
+                <textarea name="observations" id="observations" rows="4"><%= data.observations %></textarea>
             </div>
         <% } %>
-        <div>
-            <label for="additionalNotes">Notas Adicionales:</label>
-            <textarea name="additionalNotes" rows="4"><%= data.additionalNotes %></textarea>
-        </div>
-        <div>
-            <label for="logo">Logo:</label>
-            <% if (data.logoURL) { %>
-                <img src="<%= data.logoURL %>" alt="Logo">
-            <% } else { %>
-                N/A
-            <% } %>
-            <br>
-            <input type="file" name="logo">
-        </div>
-        <div>
-            <label for="priority">Prioridad:</label>
-            <input type="number" name="priority" value="<%= data.priority || 0 %>">
-        </div>
-        <button type="submit">Guardar Cambios</button>
+
+        <% if (collection === 'clients' || collection === 'julianClients' || collection === 'manualClients') { %>
+            <!-- Campo Notas Adicionales (Solo para ciertas colecciones) -->
+            <div class="form-group">
+                <label for="additionalNotes">Notas Adicionales:</label>
+                <textarea name="additionalNotes" id="additionalNotes" rows="4"><%= data.additionalNotes %></textarea>
+            </div>
+        <% } %>
+
+        <% if (collection === 'clients' || collection === 'julianClients' || collection === 'manualClients') { %>
+            <!-- Campo Logo (Solo para ciertas colecciones) -->
+            <div class="form-group">
+                <label for="logo">Logo:</label>
+                <% if (data.logoURL) { %>
+                    <img src="<%= data.logoURL %>" alt="Logo" class="logo-preview">
+                <% } else { %>
+                    <p>N/A</p>
+                <% } %>
+                <input type="file" name="logo" id="logo" accept="image/png, image/jpeg">
+            </div>
+        <% } %>
+
+        <% if (collection === 'clients' || collection === 'julianClients' || collection === 'manualClients') { %>
+            <!-- Campo Prioridad (Solo para ciertas colecciones) -->
+            <div class="form-group">
+                <label for="priority">Prioridad:</label>
+                <input type="number" name="priority" id="priority" value="<%= data.priority || 0 %>" min="0">
+            </div>
+        <% } %>
+
+        <!-- Botones de Envío y Cancelación -->
+        <% if (collection === 'wholesaleClients' || collection === 'massiveClients') { %>
+            <!-- Para Clientes Mayoristas y Masivo, no se incluyen Notas Adicionales, Logo y Prioridad -->
+            <!-- Asegúrate de que estos campos no estén presentes en el formulario -->
+        <% } else { %>
+            <button type="submit">Guardar Cambios</button>
+            <button type="button" class="cancel-button" onclick="window.history.back()">Cancelar</button>
+        <% } %>
+
+        <% if (collection === 'wholesaleClients' || collection === 'massiveClients') { %>
+            <button type="submit">Guardar Cambios</button>
+            <button type="button" class="cancel-button" onclick="window.history.back()">Cancelar</button>
+        <% } %>
     </form>
 </body>
 </html>
