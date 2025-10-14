@@ -1,0 +1,5 @@
+.env
+*.env
+*service-account*.json
+firebase-*.json
+uploads/
