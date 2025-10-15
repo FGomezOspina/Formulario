@@ -14,7 +14,8 @@ const sgMail = require('@sendgrid/mail'); // Importar SendGrid Mail
 const axios = require('axios'); // Importar Axios
 
 // Inicializar Firebase Admin SDK con las credenciales de la cuenta de servicio
-const serviceAccount = require('./formulario-531b6-firebase-adminsdk-1z5gl-d0a1d6cdbe.json');
+//const serviceAccount = require('./formulario-531b6-firebase-adminsdk-1z5gl-d0a1d6cdbe.json');
+const serviceAccount = { project_id: process.env.FIREBASE_PROJECT_ID, client_email: process.env.FIREBASE_CLIENT_EMAIL, private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\n/g, '\n') };
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
